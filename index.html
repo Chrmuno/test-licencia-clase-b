@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Test Licencia Clase B</title>
+<meta name="description" content="Practica el examen teórico de licencia de conducir clase B de Chile.">
+<meta name="theme-color" content="#1f4e79">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon.svg">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Test Clase B">
+<style>
+:root{--bg:#f4f6f9;--card:#fff;--ink:#1b2430;--muted:#5b6675;--line:#dde3ea;--pri:#1f4e79;--pri-ink:#fff;--ok:#1e7d4f;--ok-bg:#e5f4ec;--bad:#b42318;--bad-bg:#fdecea;--warn:#8a5a00;--warn-bg:#fff4dc;--sel:#e8f0f9}
+@media (prefers-color-scheme:dark){:root{--bg:#10151c;--card:#19212b;--ink:#e8edf3;--muted:#9aa6b4;--line:#2b3644;--pri:#5b9bd5;--pri-ink:#0b1420;--ok:#4cc38a;--ok-bg:#15301f;--bad:#f2766b;--bad-bg:#3a1a17;--warn:#f0b54a;--warn-bg:#33270f;--sel:#1e3047}}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.wrap{max-width:640px;margin:0 auto;padding:16px 16px calc(96px + env(safe-area-inset-bottom))}
+header.top{background:var(--pri);color:var(--pri-ink);padding:calc(14px + env(safe-area-inset-top)) 16px 14px}
+header.top .in{max-width:640px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:12px}
+header.top h1{font-size:18px;margin:0}
+header.top .score{font-weight:600;font-size:14px;opacity:.9}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;margin:14px 0}
+h2{font-size:22px;margin:0 0 8px}
+p{margin:8px 0}
+.muted{color:var(--muted)}
+.facts{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:14px 0}
+.fact{background:var(--bg);border-radius:10px;padding:10px;text-align:center}
+.fact b{display:block;font-size:24px}
+.fact span{font-size:12px;color:var(--muted)}
+button{font:inherit;border:0;border-radius:12px;padding:14px 18px;cursor:pointer}
+.btn{background:var(--pri);color:var(--pri-ink);font-weight:600;width:100%}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn2{background:transparent;color:var(--pri);border:1.5px solid var(--pri);font-weight:600}
+.bar{height:6px;background:var(--line);border-radius:6px;overflow:hidden;margin:6px 0 2px}
+.bar i{display:block;height:100%;background:var(--pri);transition:width .2s}
+.meta{display:flex;justify-content:space-between;font-size:13px;color:var(--muted)}
+.tag{display:inline-block;font-size:12px;font-weight:600;padding:3px 8px;border-radius:20px;background:var(--warn-bg);color:var(--warn);margin-right:6px}
+.tag.t{background:var(--sel);color:var(--pri)}
+.q{font-size:18px;font-weight:600;margin:12px 0 6px}
+.hint{font-size:14px;color:var(--muted);margin-bottom:10px}
+.opt{display:flex;gap:12px;align-items:flex-start;width:100%;text-align:left;background:var(--card);color:var(--ink);border:1.5px solid var(--line);border-radius:12px;padding:13px 14px;margin:8px 0}
+.opt .l{flex:none;width:28px;height:28px;border-radius:50%;border:1.5px solid var(--line);display:grid;place-items:center;font-weight:700;font-size:14px}
+.opt.multi .l{border-radius:7px}
+.opt.on{border-color:var(--pri);background:var(--sel)}
+.opt.on .l{background:var(--pri);border-color:var(--pri);color:var(--pri-ink)}
+.nav{position:fixed;left:0;right:0;bottom:0;background:var(--card);border-top:1px solid var(--line);padding:12px 16px calc(12px + env(safe-area-inset-bottom))}
+.nav .in{max-width:640px;margin:0 auto;display:flex;gap:10px}
+.nav .in > *{flex:1}
+.dots{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
+.dots button{width:34px;height:34px;padding:0;border-radius:8px;background:var(--bg);color:var(--muted);font-size:13px;font-weight:600;border:1.5px solid var(--line)}
+.dots button.a{background:var(--sel);color:var(--pri);border-color:var(--sel)}
+.dots button.c{border-color:var(--pri);color:var(--pri)}
+.result{text-align:center}
+.big{font-size:56px;font-weight:800;line-height:1;margin:10px 0}
+.pass{color:var(--ok)}.fail{color:var(--bad)}
+.banner{border-radius:12px;padding:14px;margin:12px 0;font-weight:600}
+.banner.ok{background:var(--ok-bg);color:var(--ok)}
+.banner.bad{background:var(--bad-bg);color:var(--bad)}
+.rev{border-left:4px solid var(--bad);padding-left:12px;margin:18px 0}
+.rev .ans{font-size:15px;margin:4px 0}
+.rev .ans.y{color:var(--bad)}
+.rev .ans.c{color:var(--ok);font-weight:600}
+.rev .ex{background:var(--bg);border-radius:10px;padding:10px 12px;font-size:15px;margin-top:8px}
+.hist{width:100%;border-collapse:collapse;font-size:14px}
+.hist td{padding:8px 4px;border-bottom:1px solid var(--line)}
+.hist td:last-child{text-align:right;font-weight:600}
+.small{font-size:13px}
+</style>
+</head>
+<body>
+<header class="top"><div class="in"><h1>Test Licencia Clase B</h1><span class="score" id="hdr"></span></div></header>
+<main class="wrap" id="app"><p class="muted">Cargando preguntas…</p></main>
+<div class="nav" id="nav" hidden><div class="in" id="navin"></div></div>
+<script src="data.js"></script>
+<script>
+(function(){
+const N_TOTAL=35, N_DOBLE=3, MAX=N_TOTAL+N_DOBLE, KEY='testClaseB.v1';
+const D=window.BANCO, T=D.t;
+const Q=D.q.map(r=>({id:r[0],tema:T[r[1]],p:r[2],o:r[3],c:r[4].split(''),d:!!r[5],e:r[6]}));
+const L='abcdef';
+const app=document.getElementById('app'), nav=document.getElementById('nav'), navin=document.getElementById('navin'), hdr=document.getElementById('hdr');
+let S=null;
+const load=()=>{try{return JSON.parse(localStorage.getItem(KEY))||{h:[],cur:null}}catch(e){return {h:[],cur:null}}};
+const save=st=>{try{localStorage.setItem(KEY,JSON.stringify(st))}catch(e){}};
+let store=load();
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+function newTest(){
+  const dob=shuffle(Q.filter(q=>q.d)).slice(0,N_DOBLE);
+  const rest=shuffle(Q.filter(q=>!q.d)).slice(0,N_TOTAL-N_DOBLE);
+  S={ids:shuffle(dob.concat(rest)).map(q=>q.id),a:{},i:0,start:Date.now()};
+  store.cur=S;save(store);renderQ();
+}
+const byId=id=>Q.find(q=>q.id===id);
+function pts(q){return q.d?2:1}
+function isRight(q,ans){ans=(ans||[]).slice().sort();return ans.length===q.c.length&&ans.every((x,i)=>x===q.c[i])}
+function home(){
+  nav.hidden=true;hdr.textContent='';
+  const h=store.h, best=h.reduce((m,x)=>Math.max(m,x.s),0), passed=h.filter(x=>x.s===MAX).length;
+  let html=`<div class="card"><h2>Practica tu examen teórico</h2>
+  <p class="muted">Mismo formato que el examen municipal clase B de CONASET.</p>
+  <div class="facts"><div class="fact"><b>${N_TOTAL}</b><span>preguntas</span></div><div class="fact"><b>${MAX}</b><span>puntos</span></div><div class="fact"><b>100%</b><span>para aprobar</span></div></div>
+  <p class="small muted">${N_DOBLE} preguntas valen doble (marcadas con ★). En el examen real se aprueba con 33 puntos; aquí te exigimos ${MAX} de ${MAX} para que llegues seguro. Si no logras el 100%, debes repetir el test.</p>
+  ${store.cur?`<button class="btn" id="cont">Continuar test en curso</button><p></p><button class="btn2" style="width:100%" id="go">Empezar uno nuevo</button>`:`<button class="btn" id="go">Comenzar test</button>`}
+  </div>`;
+  if(h.length){html+=`<div class="card"><h2 style="font-size:18px">Tus intentos</h2><p class="muted small">Mejor puntaje: ${best}/${MAX} · Aprobados: ${passed} de ${h.length}</p><table class="hist">`+
+    h.slice(-10).reverse().map(x=>`<tr><td>${new Date(x.t).toLocaleString('es-CL',{dateStyle:'short',timeStyle:'short'})}</td><td class="${x.s===MAX?'pass':'fail'}">${x.s}/${MAX}</td></tr>`).join('')+`</table></div>`}
+  html+=`<p class="small muted" style="text-align:center">Banco de ${Q.length} preguntas basado en el cuestionario oficial clase B (Municipalidad de Puente Alto).</p>`;
+  app.innerHTML=html;
+  document.getElementById('go').onclick=()=>{if(!store.cur||confirmNew())newTest()};
+  const c=document.getElementById('cont');if(c)c.onclick=()=>{S=store.cur;renderQ()};
+  window.scrollTo(0,0);
+}
+function confirmNew(){return true}
+function answered(){return S.ids.filter(id=>(S.a[id]||[]).length).length}
+function renderQ(){
+  const q=byId(S.ids[S.i]), sel=S.a[q.id]||[], multi=q.c.length>1;
+  hdr.textContent=`${answered()}/${N_TOTAL} respondidas`;
+  app.innerHTML=`<div class="meta"><span>Pregunta ${S.i+1} de ${N_TOTAL}</span><span>${pts(q)} punto${q.d?'s':''}</span></div>
+  <div class="bar"><i style="width:${(S.i+1)/N_TOTAL*100}%"></i></div>
+  <div class="card">${q.d?'<span class="tag">★ Doble puntaje</span>':''}<span class="tag t">${esc(q.tema)}</span>
+  <div class="q">${esc(q.p)}</div>
+  <div class="hint">${multi?`Marca ${q.c.length===2?'las 2':q.c.length===3?'las 3':'todas las'} respuestas correctas`:'Marca una respuesta'}</div>
+  ${q.o.map((t,k)=>`<button class="opt${multi?' multi':''}${sel.includes(L[k])?' on':''}" data-k="${L[k]}"><span class="l">${L[k]}</span><span>${esc(t)}</span></button>`).join('')}
+  </div>
+  <div class="dots">${S.ids.map((id,k)=>`<button data-j="${k}" class="${(S.a[id]||[]).length?'a':''} ${k===S.i?'c':''}">${k+1}</button>`).join('')}</div>`;
+  app.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{
+    const k=b.dataset.k;let cur=(S.a[q.id]||[]).slice();
+    if(multi){cur=cur.includes(k)?cur.filter(x=>x!==k):cur.concat(k)}else{cur=[k]}
+    S.a[q.id]=cur;store.cur=S;save(store);renderQ();
+  });
+  app.querySelectorAll('.dots button').forEach(b=>b.onclick=()=>{S.i=+b.dataset.j;renderQ();window.scrollTo(0,0)});
+  nav.hidden=false;
+  const last=S.i===N_TOTAL-1, all=answered()===N_TOTAL;
+  navin.innerHTML=`<button class="btn2" id="prev" ${S.i===0?'disabled style="opacity:.4"':''}>Anterior</button>`+
+    (last?`<button class="btn" id="fin" ${all?'':'disabled'}>${all?'Entregar test':`Faltan ${N_TOTAL-answered()}`}</button>`:`<button class="btn" id="next">Siguiente</button>`);
+  document.getElementById('prev').onclick=()=>{if(S.i>0){S.i--;renderQ();window.scrollTo(0,0)}};
+  const nx=document.getElementById('next');if(nx)nx.onclick=()=>{S.i++;renderQ();window.scrollTo(0,0)};
+  const fn=document.getElementById('fin');if(fn)fn.onclick=finish;
+}
+function finish(){
+  let s=0;const wrong=[];
+  S.ids.forEach(id=>{const q=byId(id);if(isRight(q,S.a[id]))s+=pts(q);else wrong.push(q)});
+  const ok=s===MAX, ans=S.a;
+  store.h.push({t:Date.now(),s});store.h=store.h.slice(-50);store.cur=null;save(store);
+  nav.hidden=false;hdr.textContent='';
+  app.innerHTML=`<div class="card result"><p class="muted">Tu puntaje</p><div class="big ${ok?'pass':'fail'}">${s}<span style="font-size:24px">/${MAX}</span></div>
+  ${ok?`<div class="banner ok">¡Aprobado con el 100%! Estás listo para el examen municipal.</div>`:
+  `<div class="banner bad">No aprobado. Necesitas ${MAX} de ${MAX}. Revisa tus ${wrong.length} error${wrong.length===1?'':'es'} y repite el test.</div>`}
+  <p class="small muted">${s>=33?'En el examen real (mínimo 33 puntos) este puntaje te habría alcanzado para aprobar.':'En el examen real se necesitan al menos 33 puntos.'}</p></div>`+
+  (wrong.length?`<div class="card"><h2 style="font-size:18px">Tus errores</h2>`+wrong.map(q=>{
+    const y=(ans[q.id]||[]).sort();
+    return `<div class="rev"><div>${q.d?'<span class="tag">★ Doble</span>':''}</div><div class="q" style="font-size:16px">${esc(q.p)}</div>
+    <div class="ans y">Tu respuesta: ${y.map(k=>`${k}) ${esc(q.o[L.indexOf(k)])}`).join(' · ')||'—'}</div>
+    <div class="ans c">Correcta: ${q.c.map(k=>`${k}) ${esc(q.o[L.indexOf(k)])}`).join(' · ')}</div>
+    <div class="ex">💡 ${esc(q.e)}</div></div>`}).join('')+`</div>`:'');
+  navin.innerHTML=ok?`<button class="btn2" id="home">Inicio</button><button class="btn" id="again">Otro test</button>`:`<button class="btn" id="again">Repetir test</button>`;
+  document.getElementById('again').onclick=newTest;
+  const hm=document.getElementById('home');if(hm)hm.onclick=home;
+  window.scrollTo(0,0);
+}
+home();
+if('serviceWorker' in navigator&&location.protocol==='https:'){navigator.serviceWorker.register('sw.js').catch(()=>{})}
+})();
+</script>
+</body>
+</html>
