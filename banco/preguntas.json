@@ -2284,7 +2284,7 @@
  },
  {
   "id": 130,
-  "tema": "Niños y seguridad",
+  "tema": "Conducción en la vía",
   "pregunta": "¿En qué situación retrocede usted con su vehículo en un cruce?",
   "opciones": {
    "a": "Si no hay nadie detrás suyo.",
@@ -2302,7 +2302,7 @@
  },
  {
   "id": 131,
-  "tema": "Niños y seguridad",
+  "tema": "Conducción en la vía",
   "pregunta": "Usted se aproxima a un cruce de calles no señalizado. Por la otra calle también se aproxima un vehículo que pretende pasar el cruce. ¿Quién tiene la prioridad para pasar?",
   "opciones": {
    "a": "El vehículo más grande.",
@@ -2320,7 +2320,7 @@
  },
  {
   "id": 132,
-  "tema": "Niños y seguridad",
+  "tema": "Conducción en la vía",
   "pregunta": "Cuando dos vehículos van a cruzarse en una intersección en la que no hay señalización alguna, ¿quién debe ceder el paso?",
   "opciones": {
    "a": "El vehículo más pequeño.",
