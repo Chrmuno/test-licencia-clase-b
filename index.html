@@ -89,6 +89,9 @@ button{font:inherit;border:0;border-radius:12px;padding:14px 18px;cursor:pointer
 (function(){
 const N_TOTAL=35, N_DOBLE=3, MAX=N_TOTAL+N_DOBLE, KEY='testClaseB.v1';
 const D=window.BANCO, T=D.t;
+const LEY={ver:'22 de octubre de 2026',
+  pdf:'https://nuevo.leychile.cl/servicios/Consulta/Exportar?radioExportar=Normas&exportar_formato=pdf&nombrearchivo=Ley-de-Transito-18290&exportar_con_notas_bcn=False&exportar_con_notas_originales=False&exportar_con_notas_al_pie=False&hddResultadoExportar=1007469.2026-10-22.0.0%23',
+  web:'https://www.bcn.cl/leychile/navegar?idNorma=1007469'};
 const IMG=window.IMG||{}, OIMG=window.OPTIMG||{};
 const Q=D.q.map(r=>({id:r[0],tema:T[r[1]],p:r[2],o:r[3],c:r[4].split(''),d:!!r[5],e:r[6],img:IMG[r[0]],oimg:OIMG[r[0]]}));
 const L='abcdef';
@@ -124,6 +127,10 @@ function home(){
   </div>`;
   if(h.length){html+=`<div class="card"><h2 style="font-size:18px">Tus intentos</h2><p class="muted small">Mejor puntaje: ${best}/${MAX} · Aprobados: ${passed} de ${h.length}</p><table class="hist">`+
     h.slice(-10).reverse().map(x=>`<tr><td>${new Date(x.t).toLocaleString('es-CL',{dateStyle:'short',timeStyle:'short'})}</td><td class="${x.s===MAX?'pass':'fail'}">${x.s}/${MAX}</td></tr>`).join('')+`</table></div>`}
+  html+=`<div class="card"><h2 style="font-size:18px">📘 Ley de Tránsito vigente</h2>
+  <p class="small muted">Texto oficial de la Ley N° 18.290 (DFL 1 de 2009), desde la Biblioteca del Congreso Nacional. Versión del ${LEY.ver}.</p>
+  <a class="btn" style="display:block;text-align:center;text-decoration:none;padding:14px 18px;border-radius:12px" href="${LEY.pdf}" target="_blank" rel="noopener">Descargar PDF</a>
+  <p class="small" style="text-align:center;margin-top:10px"><a href="${LEY.web}" target="_blank" rel="noopener" style="color:var(--pri)">Ver en la BCN (siempre la última versión)</a></p></div>`;
   html+=`<p class="small muted" style="text-align:center">Banco de ${Q.length} preguntas basado en el cuestionario oficial clase B (Municipalidad de Puente Alto).</p>`;
   app.innerHTML=html;
   document.getElementById('go').onclick=()=>{if(!store.cur||confirmNew())newTest()};
