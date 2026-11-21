@@ -108,6 +108,24 @@
   "fuente": "Cuestionario Examen Teórico Clase B, Municipalidad de Puente Alto"
  },
  {
+  "id": 7,
+  "tema": "Vehículo y mantención",
+  "pregunta": "¿Qué significa esta luz de advertencia en el panel de instrumentos?",
+  "opciones": {
+   "a": "Luces neblineras.",
+   "b": "Intermitentes de advertencia de peligro.",
+   "c": "Luces altas.",
+   "d": "Freno de mano puesto."
+  },
+  "correctas": [
+   "b"
+  ],
+  "multiple": false,
+  "doble": false,
+  "explicacion": "El triángulo rojo indica que están encendidas las luces de advertencia de peligro (intermitentes de emergencia).",
+  "fuente": "Cuestionario Examen Teórico Clase B, Municipalidad de Puente Alto (ilustración propia)"
+ },
+ {
   "id": 8,
   "tema": "Vehículo y mantención",
   "pregunta": "Es esencial que la presión de los neumáticos sea chequeada regularmente. ¿Cuándo se debe hacer esto?",
@@ -1633,6 +1651,25 @@
   "fuente": "Cuestionario Examen Teórico Clase B, Municipalidad de Puente Alto"
  },
  {
+  "id": 92,
+  "tema": "Conducción en la vía",
+  "pregunta": "Usted va detrás de un peatón que camina por el borde de la calzada. ¿Cuáles son las 2 principales razones por las que no sería adecuado adelantarlo en este momento?",
+  "opciones": {
+   "a": "Podría ensuciar al peatón.",
+   "b": "La calzada es angosta y el peatón podría desviarse inesperadamente hacia la derecha.",
+   "c": "El vehículo de la izquierda podría avanzar.",
+   "d": "Podría aparecer sorpresivamente algún vehículo en sentido contrario."
+  },
+  "correctas": [
+   "c",
+   "d"
+  ],
+  "multiple": true,
+  "doble": false,
+  "explicacion": "El auto que espera en la calle lateral puede entrar a la vía y además puede venir alguien en sentido contrario.",
+  "fuente": "Cuestionario Examen Teórico Clase B, Municipalidad de Puente Alto (ilustración propia)"
+ },
+ {
   "id": 93,
   "tema": "Conducción en la vía",
   "pregunta": "En relación con los cruces ferroviarios a nivel, ¿cuál o cuáles de las siguientes afirmaciones es(son) verdadera(s)?",
@@ -1722,6 +1759,24 @@
   "doble": false,
   "explicacion": "A 90 km/h la distancia mínima de seguridad es de unos 75 metros (unos 3 segundos).",
   "fuente": "Cuestionario Examen Teórico Clase B, Municipalidad de Puente Alto"
+ },
+ {
+  "id": 99,
+  "tema": "Conducción defensiva y usuarios vulnerables",
+  "pregunta": "Mire el dibujo. ¿Cuál es el peligro al que usted debe estar más atento?",
+  "opciones": {
+   "a": "El niño puede cruzar corriendo.",
+   "b": "El vendedor de helados puede poner su vehículo en movimiento.",
+   "c": "El auto estacionado puede ponerse en movimiento.",
+   "d": "El vendedor de helados puede bajarse de su vehículo."
+  },
+  "correctas": [
+   "a"
+  ],
+  "multiple": false,
+  "doble": true,
+  "explicacion": "Un niño junto a un carro de helados puede cruzar corriendo sin mirar; es el peligro principal.",
+  "fuente": "Cuestionario Examen Teórico Clase B, Municipalidad de Puente Alto (ilustración propia)"
  },
  {
   "id": 100,
@@ -1856,6 +1911,46 @@
   "fuente": "Cuestionario Examen Teórico Clase B, Municipalidad de Puente Alto"
  },
  {
+  "id": 107,
+  "tema": "Conducción en la vía",
+  "pregunta": "¿A qué debe estar especialmente atento el conductor del vehículo indicado con la flecha?",
+  "opciones": {
+   "a": "Irregularidades de la superficie de calzada.",
+   "b": "Peatones que puedan aparecer sorpresivamente entre autos estacionados para cruzar.",
+   "c": "Autos que abandonen sus lugares de estacionamiento.",
+   "d": "Lugares disponibles para estacionar.",
+   "e": "Puertas de automóviles estacionados que se abran.",
+   "f": "Automóviles que vengan detrás de él."
+  },
+  "correctas": [
+   "b",
+   "c",
+   "e"
+  ],
+  "multiple": true,
+  "doble": false,
+  "explicacion": "Entre autos estacionados pueden aparecer peatones, salir autos o abrirse puertas.",
+  "fuente": "Cuestionario Examen Teórico Clase B, Municipalidad de Puente Alto (ilustración propia)"
+ },
+ {
+  "id": 108,
+  "tema": "Conducción defensiva y usuarios vulnerables",
+  "pregunta": "¿Qué debería hacer el conductor del auto indicado con la flecha?",
+  "opciones": {
+   "a": "Hacer señas con la mano a los peatones que están esperando poder cruzar.",
+   "b": "Pasar rápidamente por detrás del peatón que va cruzando la calzada.",
+   "c": "Esperar a que pase el peatón que va por la calzada.",
+   "d": "Decirle al peatón que no debería haber cruzado."
+  },
+  "correctas": [
+   "c"
+  ],
+  "multiple": false,
+  "doble": true,
+  "explicacion": "El peatón que ya está cruzando tiene preferencia: espere a que termine de cruzar.",
+  "fuente": "Cuestionario Examen Teórico Clase B, Municipalidad de Puente Alto (ilustración propia)"
+ },
+ {
   "id": 110,
   "tema": "Conducción en la vía",
   "pregunta": "¿Cuál es el principal peligro cuando usted sobrepasa al bus que está detenido en la parada?",
@@ -1872,6 +1967,104 @@
   "doble": false,
   "explicacion": "Un pasajero que baja del bus puede cruzar repentinamente por delante del bus.",
   "fuente": "Cuestionario Examen Teórico Clase B, Municipalidad de Puente Alto"
+ },
+ {
+  "id": 111,
+  "tema": "Conducción en la vía",
+  "pregunta": "¿Qué significa la señal que está efectuando el camión?",
+  "opciones": {
+   "a": "El camión va a disminuir la velocidad y va a detenerse.",
+   "b": "El conductor del camión le está indicando a usted que lo puede adelantar.",
+   "c": "El camión va a virar a la derecha.",
+   "d": "El conductor del camión ha olvidado apagar sus luces indicadoras de viraje."
+  },
+  "correctas": [
+   "c"
+  ],
+  "multiple": false,
+  "doble": false,
+  "explicacion": "El intermitente derecho encendido indica que el camión va a virar a la derecha; nunca lo tome como invitación a adelantar.",
+  "fuente": "Cuestionario Examen Teórico Clase B, Municipalidad de Puente Alto (ilustración propia)"
+ },
+ {
+  "id": 112,
+  "tema": "Conducción en la vía",
+  "pregunta": "¿Qué debe hacer usted cuando va en una fila de autos?",
+  "opciones": {
+   "a": "Debe concentrarse sólo en el vehículo que va inmediatamente delante suyo.",
+   "b": "Debe mantener un espacio suficiente respecto del vehículo que va delante suyo, de modo de posibilitar que otro vehículo lo adelante a usted e ingrese a dicho espacio.",
+   "c": "Debe mirar a buena distancia hacia adelante, eventualmente a través de los cristales de los otros vehículos, a fin de poder moderar la velocidad a tiempo si alguien frena.",
+   "d": "Debe mantenerse atento a los vehículos que van tanto delante como detrás suyo.",
+   "e": "Debe concentrarse sólo en el vehículo que va detrás suyo."
+  },
+  "correctas": [
+   "b",
+   "c",
+   "d"
+  ],
+  "multiple": true,
+  "doble": false,
+  "explicacion": "En una fila mantenga espacio, mire lejos hacia adelante y esté atento a quienes van delante y detrás.",
+  "fuente": "Cuestionario Examen Teórico Clase B, Municipalidad de Puente Alto (respuesta según normativa; el cuestionario no trae pauta)"
+ },
+ {
+  "id": 114,
+  "tema": "Conducción defensiva y usuarios vulnerables",
+  "pregunta": "En esta situación, ¿a cuáles 3 riesgos debe estar usted principalmente atento?",
+  "opciones": {
+   "a": "Al ciclista que viene en sentido contrario.",
+   "b": "Al tránsito en la intersección que hay más adelante.",
+   "c": "A las puertas de autos que pueden ser abiertas.",
+   "d": "A niños que pueden salir a la calzada por entre los autos.",
+   "e": "A los vehículos que pueden venir detrás suyo.",
+   "f": "A irregularidades de la superficie de calzada."
+  },
+  "correctas": [
+   "a",
+   "c",
+   "d"
+  ],
+  "multiple": true,
+  "doble": false,
+  "explicacion": "Los riesgos cercanos son el ciclista que viene en contra, las puertas de los autos estacionados y niños que salgan entre ellos.",
+  "fuente": "Cuestionario Examen Teórico Clase B, Municipalidad de Puente Alto (ilustración propia)"
+ },
+ {
+  "id": 115,
+  "tema": "Conducción defensiva y usuarios vulnerables",
+  "pregunta": "Usted va conduciendo a 70 km/h, que es la velocidad máxima permitida en esta vía. ¿Qué hace en esta situación?",
+  "opciones": {
+   "a": "Está preparado para actuar ya que alguien puede salir corriendo a la calzada.",
+   "b": "Está preparado para actuar ya que el bus puede ponerse en marcha.",
+   "c": "Frena y cede el paso al bus, si éste está por salir de la parada.",
+   "d": "Sigue conduciendo sin estar preparado para nada en especial, ya que usted tiene dominio de su vehículo."
+  },
+  "correctas": [
+   "a",
+   "b"
+  ],
+  "multiple": true,
+  "doble": false,
+  "explicacion": "Junto a un bus detenido puede salir un peatón corriendo o el bus puede partir: esté preparado para actuar.",
+  "fuente": "Cuestionario Examen Teórico Clase B, Municipalidad de Puente Alto (ilustración propia)"
+ },
+ {
+  "id": 116,
+  "tema": "Conducción defensiva y usuarios vulnerables",
+  "pregunta": "Hay peatones caminando por su pista y viene un vehículo en sentido contrario. ¿Qué hace usted?",
+  "opciones": {
+   "a": "Hace señales a los peatones para que se alejen de la calzada.",
+   "b": "Reduce su velocidad y continúa conduciendo.",
+   "c": "Hace señales de luces al vehículo que viene en contra para que espere a que usted haya pasado.",
+   "d": "Espera y deja pasar primero al vehículo que viene en contra, y luego usted continúa y pasa a los peatones."
+  },
+  "correctas": [
+   "d"
+  ],
+  "multiple": false,
+  "doble": false,
+  "explicacion": "No pase entre los peatones y el auto que viene: espere que pase el otro vehículo y luego adelante a los peatones con espacio.",
+  "fuente": "Cuestionario Examen Teórico Clase B, Municipalidad de Puente Alto (ilustración propia)"
  },
  {
   "id": 117,
@@ -2216,6 +2409,25 @@
   "fuente": "Cuestionario Examen Teórico Clase B, Municipalidad de Puente Alto"
  },
  {
+  "id": 138,
+  "tema": "Adelantamiento y estacionamiento",
+  "pregunta": "Usted está en una calle de un solo sentido de tránsito y desea virar a la izquierda. ¿Cuál o cuáles de las siguientes afirmaciones son correctas?",
+  "opciones": {
+   "a": "Usted está bien situado para virar a la izquierda.",
+   "b": "Si después de virar usted volverá a virar nuevamente a la izquierda en el siguiente cruce, lo mejor es que se mantenga en la pista izquierda de la calle hacia la cual está virando.",
+   "c": "Usted nunca puede saber si la calle hacia la cual vira tiene un solo sentido de tránsito o dos. Por eso, siempre debe tomar la pista derecha de la calle hacia la cual vira.",
+   "d": "No es necesario que usted señalice que va a virar."
+  },
+  "correctas": [
+   "a",
+   "b"
+  ],
+  "multiple": true,
+  "doble": false,
+  "explicacion": "En calle de un solo sentido, para virar a la izquierda se ubica en la pista izquierda y siempre se señaliza.",
+  "fuente": "Cuestionario Examen Teórico Clase B, Municipalidad de Puente Alto (ilustración propia)"
+ },
+ {
   "id": 141,
   "tema": "Adelantamiento y estacionamiento",
   "pregunta": "Usted va por una calle de doble sentido de tránsito. Para virar a la izquierda, ¿dónde debería ubicarse?",
@@ -2272,6 +2484,25 @@
   "fuente": "Cuestionario Examen Teórico Clase B, Municipalidad de Puente Alto"
  },
  {
+  "id": 146,
+  "tema": "Adelantamiento y estacionamiento",
+  "pregunta": "Usted conduce a 90 km/h, que es la velocidad máxima permitida en esa vía. ¿Qué hace usted si a pesar de todo un vehículo desea adelantarlo?",
+  "opciones": {
+   "a": "Conduce lo más a la derecha posible.",
+   "b": "Se desplaza hacia la berma y circula por ella.",
+   "c": "Enciende sus luces de advertencia de peligro.",
+   "d": "No acelera."
+  },
+  "correctas": [
+   "a",
+   "d"
+  ],
+  "multiple": true,
+  "doble": false,
+  "explicacion": "Facilite el adelantamiento: manténgase a la derecha y no acelere. No se debe circular por la berma.",
+  "fuente": "Cuestionario Examen Teórico Clase B, Municipalidad de Puente Alto (ilustración propia)"
+ },
+ {
   "id": 147,
   "tema": "Adelantamiento y estacionamiento",
   "pregunta": "Usted va por una carretera a 100 km/h. ¿Qué hace usted si a pesar de todo un vehículo que viene atrás desea adelantarlo?",
@@ -2290,6 +2521,42 @@
   "doble": false,
   "explicacion": "Si lo quieren adelantar, manténgase a la derecha y mantenga o baje la velocidad.",
   "fuente": "Cuestionario Examen Teórico Clase B, Municipalidad de Puente Alto"
+ },
+ {
+  "id": 148,
+  "tema": "Adelantamiento y estacionamiento",
+  "pregunta": "Usted desea adelantar al camión. ¿Cuál o cuáles de las siguientes afirmaciones son verdaderas?",
+  "opciones": {
+   "a": "El camión tiene la obligación de correrse hacia la berma para dejarle a usted más espacio.",
+   "b": "El auto que viene en sentido contrario tiene la obligación de correrse a la berma para aumentar la seguridad.",
+   "c": "El camión está obligado a reducir la velocidad.",
+   "d": "Usted tiene la obligación de esperar a que la pista del sentido contrario esté libre de vehículos para luego adelantar."
+  },
+  "correctas": [
+   "d"
+  ],
+  "multiple": false,
+  "doble": false,
+  "explicacion": "Quien adelanta es responsable: debe esperar a que la pista contraria esté libre.",
+  "fuente": "Cuestionario Examen Teórico Clase B, Municipalidad de Puente Alto (ilustración propia)"
+ },
+ {
+  "id": 149,
+  "tema": "Adelantamiento y estacionamiento",
+  "pregunta": "Usted ha comenzado a adelantar al auto A, que va a unos 80 km/h. Viene un auto en sentido contrario y por el espejo ve otro auto que también quiere adelantar. ¿Qué hace usted?",
+  "opciones": {
+   "a": "Frena ligeramente y vuelve a la pista derecha.",
+   "b": "Acelera y adelanta, porque el auto que usted adelanta tiene la obligación de reducir la velocidad.",
+   "c": "Acelera y adelanta tan rápido como pueda, para no obstaculizar al que viene detrás suyo.",
+   "d": "Acelera y adelanta, ya que el ancho de la calzada es suficiente para 3 vehículos si el que viene en contra se corre bien a su derecha."
+  },
+  "correctas": [
+   "a"
+  ],
+  "multiple": false,
+  "doble": true,
+  "explicacion": "Si no hay espacio seguro para terminar el adelantamiento, desista: frene un poco y vuelva a su pista.",
+  "fuente": "Cuestionario Examen Teórico Clase B, Municipalidad de Puente Alto (ilustración propia)"
  },
  {
   "id": 150,
@@ -2592,6 +2859,24 @@
   "doble": false,
   "explicacion": "De noche en zona rural, al estacionar por emergencia, encienda siempre las luces de estacionamiento.",
   "fuente": "Cuestionario Examen Teórico Clase B, Municipalidad de Puente Alto"
+ },
+ {
+  "id": 169,
+  "tema": "Conducción defensiva y usuarios vulnerables",
+  "pregunta": "Hay peatones cruzando por el paso de cebra. ¿Qué hace usted?",
+  "opciones": {
+   "a": "Continúa a la misma velocidad.",
+   "b": "Toca la bocina.",
+   "c": "Pasa el paso de peatones lo más rápido posible.",
+   "d": "Se detiene."
+  },
+  "correctas": [
+   "d"
+  ],
+  "multiple": false,
+  "doble": true,
+  "explicacion": "En un paso de cebra los peatones tienen preferencia: deténgase y déjelos cruzar.",
+  "fuente": "Cuestionario Examen Teórico Clase B, Municipalidad de Puente Alto (ilustración propia)"
  },
  {
   "id": 170,
@@ -3222,6 +3507,24 @@
   "doble": false,
   "explicacion": "Con viento fuerte la moto puede tambalear o desviarse.",
   "fuente": "Cuestionario Examen Teórico Clase B, Municipalidad de Puente Alto"
+ },
+ {
+  "id": 205,
+  "tema": "Señales y semáforos",
+  "pregunta": "¿De qué le advierte esta señal?",
+  "opciones": {
+   "a": "De la posible presencia de escolares.",
+   "b": "De la proximidad de un cruce de peatones.",
+   "c": "De la posible presencia de niños jugando.",
+   "d": "De la proximidad de un parque o plaza."
+  },
+  "correctas": [
+   "a"
+  ],
+  "multiple": false,
+  "doble": false,
+  "explicacion": "El rombo amarillo con dos escolares advierte la proximidad de una zona de colegio.",
+  "fuente": "Cuestionario Examen Teórico Clase B, Municipalidad de Puente Alto (ilustración propia)"
  },
  {
   "id": 206,
@@ -3895,6 +4198,42 @@
   "fuente": "Cuestionario Examen Teórico Clase B, Municipalidad de Puente Alto"
  },
  {
+  "id": 244,
+  "tema": "Señales y semáforos",
+  "pregunta": "Al ir circulando en su vehículo usted enfrenta esta señal. ¿Qué significa?",
+  "opciones": {
+   "a": "Que usted puede conducir hasta un 10% más rápido, porque la señal es sólo referencial.",
+   "b": "Que en días no hábiles, cuando hay poco tránsito, no rige tal restricción.",
+   "c": "Que usted no debe exceder esta velocidad.",
+   "d": "Que usted debe mantener una velocidad inferior a la indicada en la señal."
+  },
+  "correctas": [
+   "c"
+  ],
+  "multiple": false,
+  "doble": true,
+  "explicacion": "El círculo rojo con un número indica la velocidad máxima: no debe superarla nunca.",
+  "fuente": "Cuestionario Examen Teórico Clase B, Municipalidad de Puente Alto (ilustración propia)"
+ },
+ {
+  "id": 245,
+  "tema": "Señales y semáforos",
+  "pregunta": "¿Qué significa esta señal?",
+  "opciones": {
+   "a": "Usted no debe exceder la velocidad indicada.",
+   "b": "Es más seguro conducir a la velocidad indicada.",
+   "c": "La velocidad indicada es la máxima aconsejada.",
+   "d": "Es una recomendación para cuando hay mucho tránsito."
+  },
+  "correctas": [
+   "a"
+  ],
+  "multiple": false,
+  "doble": false,
+  "explicacion": "Es una señal reglamentaria de velocidad máxima: es obligatoria, no una recomendación.",
+  "fuente": "Cuestionario Examen Teórico Clase B, Municipalidad de Puente Alto (ilustración propia)"
+ },
+ {
   "id": 246,
   "tema": "Señales y semáforos",
   "pregunta": "¿Cuándo puede usted ingresar a un cruce en cuya calzada se han pintado franjas amarillas diagonales?",
@@ -3911,6 +4250,96 @@
   "doble": false,
   "explicacion": "En las franjas amarillas diagonales sólo entre si tiene espacio para salir sin quedar detenido.",
   "fuente": "Cuestionario Examen Teórico Clase B, Municipalidad de Puente Alto"
+ },
+ {
+  "id": 247,
+  "tema": "Señales y semáforos",
+  "pregunta": "¿Qué significa esta señal de tránsito?",
+  "opciones": {
+   "a": "Gravilla suelta.",
+   "b": "Peligro de que se pinchen los neumáticos.",
+   "c": "Pavimento resbaladizo.",
+   "d": "Curvas en el camino."
+  },
+  "correctas": [
+   "c"
+  ],
+  "multiple": false,
+  "doble": false,
+  "explicacion": "El auto con huellas zigzagueantes advierte pavimento resbaladizo.",
+  "fuente": "Cuestionario Examen Teórico Clase B, Municipalidad de Puente Alto (ilustración propia)"
+ },
+ {
+  "id": 248,
+  "tema": "Señales y semáforos",
+  "pregunta": "¿Qué significa esta señal?",
+  "opciones": {
+   "a": "No adelantar.",
+   "b": "Mantenga su derecha.",
+   "c": "Preferencia al tránsito que viene en sentido contrario.",
+   "d": "No cambiar de pista."
+  },
+  "correctas": [
+   "a"
+  ],
+  "multiple": false,
+  "doble": false,
+  "explicacion": "Dos autos dentro de un círculo rojo, uno de ellos rojo, significa prohibido adelantar.",
+  "fuente": "Cuestionario Examen Teórico Clase B, Municipalidad de Puente Alto (ilustración propia)"
+ },
+ {
+  "id": 249,
+  "tema": "Señales y semáforos",
+  "pregunta": "¿Cuál de los siguientes tipos de señales le indica que no haga algo?",
+  "opciones": {
+   "a": "",
+   "b": "",
+   "c": "",
+   "d": ""
+  },
+  "correctas": [
+   "c"
+  ],
+  "multiple": false,
+  "doble": false,
+  "explicacion": "Las señales de prohibición son circulares con borde rojo, muchas veces con una franja diagonal.",
+  "fuente": "Cuestionario Examen Teórico Clase B, Municipalidad de Puente Alto (ilustración propia)"
+ },
+ {
+  "id": 250,
+  "tema": "Señales y semáforos",
+  "pregunta": "¿Qué debe hacer usted cuando enfrenta esta señal?",
+  "opciones": {
+   "a": "Detenerse sólo si viene algún vehículo por la otra vía.",
+   "b": "Detenerse sólo si hay peatones esperando para cruzar.",
+   "c": "Detenerse sólo si en la calzada está pintada la leyenda PARE.",
+   "d": "Detenerse siempre."
+  },
+  "correctas": [
+   "d"
+  ],
+  "multiple": false,
+  "doble": true,
+  "explicacion": "Ante un PARE debe detenerse siempre, aunque no venga nadie, y luego ceder el paso.",
+  "fuente": "Cuestionario Examen Teórico Clase B, Municipalidad de Puente Alto (ilustración propia)"
+ },
+ {
+  "id": 251,
+  "tema": "Señales y semáforos",
+  "pregunta": "¿Qué significa esta señal?",
+  "opciones": {
+   "a": "Semáforo fuera de servicio.",
+   "b": "Proximidad de semáforo.",
+   "c": "Semáforo activado por peatones.",
+   "d": "Semáforos sincronizados."
+  },
+  "correctas": [
+   "b"
+  ],
+  "multiple": false,
+  "doble": false,
+  "explicacion": "Rombo amarillo con un semáforo: advierte que más adelante hay un semáforo.",
+  "fuente": "Cuestionario Examen Teórico Clase B, Municipalidad de Puente Alto (ilustración propia)"
  },
  {
   "id": 252,
@@ -3967,6 +4396,96 @@
   "fuente": "Cuestionario Examen Teórico Clase B, Municipalidad de Puente Alto"
  },
  {
+  "id": 255,
+  "tema": "Señales y semáforos",
+  "pregunta": "¿Qué significa esta señal?",
+  "opciones": {
+   "a": "Angostamiento de la vía.",
+   "b": "Preferencia al tránsito que viene en sentido contrario.",
+   "c": "Proximidad de doble calzada.",
+   "d": "Dos sentidos de tránsito más adelante."
+  },
+  "correctas": [
+   "d"
+  ],
+  "multiple": false,
+  "doble": false,
+  "explicacion": "Las flechas opuestas advierten que más adelante la vía pasa a tener tránsito en ambos sentidos.",
+  "fuente": "Cuestionario Examen Teórico Clase B, Municipalidad de Puente Alto (ilustración propia)"
+ },
+ {
+  "id": 256,
+  "tema": "Señales y semáforos",
+  "pregunta": "¿Qué significa esta señal?",
+  "opciones": {
+   "a": "Zona de escuela.",
+   "b": "Cruce de peatones.",
+   "c": "Niños jugando.",
+   "d": "Peatón debe transitar por su izquierda."
+  },
+  "correctas": [
+   "b"
+  ],
+  "multiple": false,
+  "doble": false,
+  "explicacion": "Un peatón sobre franjas indica la proximidad de un cruce de peatones.",
+  "fuente": "Cuestionario Examen Teórico Clase B, Municipalidad de Puente Alto (ilustración propia)"
+ },
+ {
+  "id": 257,
+  "tema": "Señales y semáforos",
+  "pregunta": "¿Cuál de estas señales le previene que más adelante hay una serie de curvas?",
+  "opciones": {
+   "a": "",
+   "b": "",
+   "c": "",
+   "d": ""
+  },
+  "correctas": [
+   "b"
+  ],
+  "multiple": false,
+  "doble": false,
+  "explicacion": "La flecha que zigzaguea varias veces advierte una serie de curvas; la de una sola curva advierte sólo una.",
+  "fuente": "Cuestionario Examen Teórico Clase B, Municipalidad de Puente Alto (ilustración propia)"
+ },
+ {
+  "id": 258,
+  "tema": "Señales y semáforos",
+  "pregunta": "¿Qué significa esta señal?",
+  "opciones": {
+   "a": "Que se acerca a una zona en la que no se permiten bicicletas.",
+   "b": "Que los ciclistas deben circular por la pista de la derecha.",
+   "c": "Que los ciclistas deben circular en sentido contrario.",
+   "d": "Que se acerca a una zona donde es muy probable la presencia de ciclistas."
+  },
+  "correctas": [
+   "d"
+  ],
+  "multiple": false,
+  "doble": false,
+  "explicacion": "Rombo amarillo con bicicleta: advierte la posible presencia de ciclistas.",
+  "fuente": "Cuestionario Examen Teórico Clase B, Municipalidad de Puente Alto (ilustración propia)"
+ },
+ {
+  "id": 259,
+  "tema": "Señales y semáforos",
+  "pregunta": "¿Cuál de estas señales le advierte la proximidad de un cruce de peatones?",
+  "opciones": {
+   "a": "",
+   "b": "",
+   "c": "",
+   "d": ""
+  },
+  "correctas": [
+   "a"
+  ],
+  "multiple": false,
+  "doble": false,
+  "explicacion": "El cruce de peatones se advierte con un peatón sobre franjas; los dos escolares indican zona de colegio.",
+  "fuente": "Cuestionario Examen Teórico Clase B, Municipalidad de Puente Alto (ilustración propia)"
+ },
+ {
   "id": 260,
   "tema": "Señales y semáforos",
   "pregunta": "De las siguientes señales de tránsito, ¿cuál o cuáles corresponden a señales amarillas con forma de rombo?",
@@ -4006,6 +4525,60 @@
   "doble": false,
   "explicacion": "Después del amarillo viene el rojo y luego el verde.",
   "fuente": "Cuestionario Examen Teórico Clase B, Municipalidad de Puente Alto"
+ },
+ {
+  "id": 262,
+  "tema": "Señales y semáforos",
+  "pregunta": "¿Qué significa la demarcación de centro de calzada que muestra la figura?",
+  "opciones": {
+   "a": "Que no puede ser traspasada por un conductor que viene por la pista A.",
+   "b": "Que no puede ser traspasada por un conductor que va por la pista B.",
+   "c": "Que en ningún caso pueden efectuarse adelantamientos.",
+   "d": "Que sólo un conductor que va por la pista B podría efectuar un adelantamiento."
+  },
+  "correctas": [
+   "b"
+  ],
+  "multiple": false,
+  "doble": false,
+  "explicacion": "Manda la línea más cercana a cada pista: quien tiene la línea continua a su lado (pista B) no puede cruzarla; quien tiene la segmentada (pista A) sí, con precaución.",
+  "fuente": "Cuestionario Examen Teórico Clase B, Municipalidad de Puente Alto (ilustración propia)"
+ },
+ {
+  "id": 263,
+  "tema": "Señales y semáforos",
+  "pregunta": "El vehículo indicado con la flecha se encuentra detenido sobre una zona achurada esperando poder efectuar un viraje en U. ¿Es esto correcto?",
+  "opciones": {
+   "a": "Sí, la zona achurada sólo separa sentidos de circulación.",
+   "b": "Sí, siempre que la zona achurada no esté reforzada con tachas o tachones reflectantes.",
+   "c": "No, porque los vehículos no pueden detenerse ni circular por zonas achuradas.",
+   "d": "No, porque se trata de una vía de mucho tránsito."
+  },
+  "correctas": [
+   "c"
+  ],
+  "multiple": false,
+  "doble": false,
+  "explicacion": "Sobre una zona achurada no se puede circular ni detenerse.",
+  "fuente": "Cuestionario Examen Teórico Clase B, Municipalidad de Puente Alto (ilustración propia)"
+ },
+ {
+  "id": 265,
+  "tema": "Señales y semáforos",
+  "pregunta": "¿Qué le indica esta señal de tránsito?",
+  "opciones": {
+   "a": "Que usted está obligado a detenerse a la altura de la señal.",
+   "b": "Advierte que el cruce al que usted se aproxima es peligroso.",
+   "c": "Que usted está obligado a ceder el paso a los vehículos que se aproximen por la otra vía.",
+   "d": "Es sólo una recomendación para que usted ponga especial atención al pasar el cruce."
+  },
+  "correctas": [
+   "c"
+  ],
+  "multiple": false,
+  "doble": true,
+  "explicacion": "CEDA EL PASO obliga a ceder el paso a quienes vienen por la otra vía; sólo debe detenerse si es necesario.",
+  "fuente": "Cuestionario Examen Teórico Clase B, Municipalidad de Puente Alto (ilustración propia)"
  },
  {
   "id": 266,
@@ -4141,6 +4714,78 @@
   "doble": false,
   "explicacion": "Encienda las luces de emergencia y asegúrese de que llamen al 133; no mueva a los heridos graves.",
   "fuente": "Cuestionario Examen Teórico Clase B, Municipalidad de Puente Alto"
+ },
+ {
+  "id": 274,
+  "tema": "Accidentes y documentos",
+  "pregunta": "Usted llega al lugar de un accidente en el que participó un camión cargado con productos químicos peligrosos. ¿Qué debería hacer usted antes de llamar al 133 de Carabineros?",
+  "opciones": {
+   "a": "Tratar de mover el camión.",
+   "b": "Tratar de diluir los productos químicos con agua.",
+   "c": "Averiguar de qué clase de producto químico se trata mirando los rótulos del camión.",
+   "d": "Tratar de evitar que los productos químicos se sigan derramando."
+  },
+  "correctas": [
+   "c"
+  ],
+  "multiple": false,
+  "doble": false,
+  "explicacion": "Mire desde una distancia segura los rótulos del camión para informar qué producto es; no toque ni intente controlar el derrame.",
+  "fuente": "Cuestionario Examen Teórico Clase B, Municipalidad de Puente Alto (respuesta según normativa; el cuestionario no trae pauta)"
+ },
+ {
+  "id": 275,
+  "tema": "Accidentes y documentos",
+  "pregunta": "Usted llega al lugar de un accidente en el que ha participado un motociclista. El motociclista yace consciente, pero en estado de shock. ¿De qué debería asegurarse usted?",
+  "opciones": {
+   "a": "Que el motociclista se saque el casco.",
+   "b": "Que el motociclista no se saque el casco.",
+   "c": "Que al motociclista se le ayude a ponerse de pie.",
+   "d": "Que al motociclista se le dé algo para beber."
+  },
+  "correctas": [
+   "b"
+  ],
+  "multiple": false,
+  "doble": false,
+  "explicacion": "No se debe sacar el casco a un motociclista accidentado: podría agravar una lesión de cuello.",
+  "fuente": "Cuestionario Examen Teórico Clase B, Municipalidad de Puente Alto (respuesta según normativa; el cuestionario no trae pauta)"
+ },
+ {
+  "id": 276,
+  "tema": "Accidentes y documentos",
+  "pregunta": "Usted va por una autopista. De un camión cargado que va delante suyo cae una caja sin que su conductor se dé cuenta. ¿Qué hace usted?",
+  "opciones": {
+   "a": "Trata de alcanzar al camión y de llamar la atención de su conductor.",
+   "b": "Se detiene junto a la caja y enciende sus luces de emergencia hasta que llegue ayuda.",
+   "c": "Se desplaza hacia la berma y luego intenta recoger la caja.",
+   "d": "Continúa hasta donde haya un teléfono para avisar a la policía o a los encargados de la autopista."
+  },
+  "correctas": [
+   "d"
+  ],
+  "multiple": false,
+  "doble": false,
+  "explicacion": "No se detenga ni camine por la autopista: avise a la policía o a la concesionaria para que retiren el objeto.",
+  "fuente": "Cuestionario Examen Teórico Clase B, Municipalidad de Puente Alto (respuesta según normativa; el cuestionario no trae pauta)"
+ },
+ {
+  "id": 277,
+  "tema": "Accidentes y documentos",
+  "pregunta": "¿Quién o quiénes están cubiertos por el Seguro Obligatorio de Accidentes Personales (SOAP)?",
+  "opciones": {
+   "a": "Sólo el conductor del vehículo asegurado.",
+   "b": "Sólo los pasajeros del vehículo asegurado.",
+   "c": "Sólo los pasajeros y el conductor del vehículo asegurado.",
+   "d": "El conductor, los pasajeros y cualquier tercero afectado en un accidente en que participe el vehículo asegurado."
+  },
+  "correctas": [
+   "d"
+  ],
+  "multiple": false,
+  "doble": false,
+  "explicacion": "El SOAP cubre al conductor, a los pasajeros y a terceros, como peatones, lesionados en un accidente del vehículo.",
+  "fuente": "Cuestionario Examen Teórico Clase B, Municipalidad de Puente Alto (respuesta según normativa; el cuestionario no trae pauta)"
  },
  {
   "id": 278,

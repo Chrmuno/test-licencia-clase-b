@@ -67,6 +67,16 @@ button{font:inherit;border:0;border-radius:12px;padding:14px 18px;cursor:pointer
 .hist td{padding:8px 4px;border-bottom:1px solid var(--line)}
 .hist td:last-child{text-align:right;font-weight:600}
 .small{font-size:13px}
+.fig{margin:10px 0 4px;border-radius:12px;overflow:hidden;border:1px solid var(--line);background:#fff}
+.fig svg{display:block;width:100%;height:auto;max-height:260px}
+.fig.sign{max-width:170px;margin:10px auto 4px;border:0;background:transparent}
+.oimg{width:84px;flex:none}.oimg svg{display:block;width:100%;height:auto}
+.opt.ok{border-color:var(--ok);background:var(--ok-bg)}.opt.ok .l{background:var(--ok);border-color:var(--ok);color:#fff}
+.opt.no{border-color:var(--bad);background:var(--bad-bg)}.opt.no .l{background:var(--bad);border-color:var(--bad);color:#fff}
+.mini{display:inline-block;width:46px;vertical-align:middle}.mini svg{width:100%;height:auto;display:block}
+.fb{border-radius:12px;padding:12px 14px;margin-top:12px;font-size:15px}
+.fb.ok{background:var(--ok-bg);color:var(--ok)}.fb.no{background:var(--bad-bg);color:var(--bad)}
+.fb .ex{color:var(--ink);margin-top:6px;font-weight:400}
 </style>
 </head>
 <body>
@@ -74,15 +84,17 @@ button{font:inherit;border:0;border-radius:12px;padding:14px 18px;cursor:pointer
 <main class="wrap" id="app"><p class="muted">Cargando preguntas…</p></main>
 <div class="nav" id="nav" hidden><div class="in" id="navin"></div></div>
 <script src="data.js"></script>
+<script src="imagenes.js"></script>
 <script>
 (function(){
 const N_TOTAL=35, N_DOBLE=3, MAX=N_TOTAL+N_DOBLE, KEY='testClaseB.v1';
 const D=window.BANCO, T=D.t;
-const Q=D.q.map(r=>({id:r[0],tema:T[r[1]],p:r[2],o:r[3],c:r[4].split(''),d:!!r[5],e:r[6]}));
+const IMG=window.IMG||{}, OIMG=window.OPTIMG||{};
+const Q=D.q.map(r=>({id:r[0],tema:T[r[1]],p:r[2],o:r[3],c:r[4].split(''),d:!!r[5],e:r[6],img:IMG[r[0]],oimg:OIMG[r[0]]}));
 const L='abcdef';
 const app=document.getElementById('app'), nav=document.getElementById('nav'), navin=document.getElementById('navin'), hdr=document.getElementById('hdr');
 let S=null;
-const load=()=>{try{return JSON.parse(localStorage.getItem(KEY))||{h:[],cur:null}}catch(e){return {h:[],cur:null}}};
+const load=()=>{let st;try{st=JSON.parse(localStorage.getItem(KEY))}catch(e){}st=st||{};st.h=st.h||[];st.cur=st.cur||null;st.err=(st.err||[]).filter(id=>D.q.some(r=>r[0]===id));return st};
 const save=st=>{try{localStorage.setItem(KEY,JSON.stringify(st))}catch(e){}};
 let store=load();
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
@@ -95,6 +107,10 @@ function newTest(){
 }
 const byId=id=>Q.find(q=>q.id===id);
 function pts(q){return q.d?2:1}
+function figHTML(q){if(!q.img)return '';const sign=q.img.indexOf('viewBox="0 0 200 200"')>0;return `<div class="fig${sign?' sign':''}">${q.img}</div>`}
+function optInner(q,k){const i=L.indexOf(k);return (q.oimg?`<span class="oimg">${q.oimg[i]}</span>`:'')+(q.o[i]?`<span>${esc(q.o[i])}</span>`:'')}
+function optShort(q,k){const i=L.indexOf(k);return q.oimg?`${k}) <span class="mini">${q.oimg[i]}</span>`:`${k}) ${esc(q.o[i])}`}
+function hintTxt(q){const n=q.c.length;return n>1?`Marca ${n===2?'las 2':n===3?'las 3':'todas las'} respuestas correctas`:'Marca una respuesta'}
 function isRight(q,ans){ans=(ans||[]).slice().sort();return ans.length===q.c.length&&ans.every((x,i)=>x===q.c[i])}
 function home(){
   nav.hidden=true;hdr.textContent='';
@@ -104,6 +120,7 @@ function home(){
   <div class="facts"><div class="fact"><b>${N_TOTAL}</b><span>preguntas</span></div><div class="fact"><b>${MAX}</b><span>puntos</span></div><div class="fact"><b>100%</b><span>para aprobar</span></div></div>
   <p class="small muted">${N_DOBLE} preguntas valen doble (marcadas con ★). En el examen real se aprueba con 33 puntos; aquí te exigimos ${MAX} de ${MAX} para que llegues seguro. Si no logras el 100%, debes repetir el test.</p>
   ${store.cur?`<button class="btn" id="cont">Continuar test en curso</button><p></p><button class="btn2" style="width:100%" id="go">Empezar uno nuevo</button>`:`<button class="btn" id="go">Comenzar test</button>`}
+  ${store.err.length?`<p></p><button class="btn2" style="width:100%" id="studyAll">Estudiar mis errores (${store.err.length})</button>`:''}
   </div>`;
   if(h.length){html+=`<div class="card"><h2 style="font-size:18px">Tus intentos</h2><p class="muted small">Mejor puntaje: ${best}/${MAX} · Aprobados: ${passed} de ${h.length}</p><table class="hist">`+
     h.slice(-10).reverse().map(x=>`<tr><td>${new Date(x.t).toLocaleString('es-CL',{dateStyle:'short',timeStyle:'short'})}</td><td class="${x.s===MAX?'pass':'fail'}">${x.s}/${MAX}</td></tr>`).join('')+`</table></div>`}
@@ -111,6 +128,7 @@ function home(){
   app.innerHTML=html;
   document.getElementById('go').onclick=()=>{if(!store.cur||confirmNew())newTest()};
   const c=document.getElementById('cont');if(c)c.onclick=()=>{S=store.cur;renderQ()};
+  const sa=document.getElementById('studyAll');if(sa)sa.onclick=()=>startStudy(store.err.slice());
   window.scrollTo(0,0);
 }
 function confirmNew(){return true}
@@ -121,9 +139,9 @@ function renderQ(){
   app.innerHTML=`<div class="meta"><span>Pregunta ${S.i+1} de ${N_TOTAL}</span><span>${pts(q)} punto${q.d?'s':''}</span></div>
   <div class="bar"><i style="width:${(S.i+1)/N_TOTAL*100}%"></i></div>
   <div class="card">${q.d?'<span class="tag">★ Doble puntaje</span>':''}<span class="tag t">${esc(q.tema)}</span>
-  <div class="q">${esc(q.p)}</div>
-  <div class="hint">${multi?`Marca ${q.c.length===2?'las 2':q.c.length===3?'las 3':'todas las'} respuestas correctas`:'Marca una respuesta'}</div>
-  ${q.o.map((t,k)=>`<button class="opt${multi?' multi':''}${sel.includes(L[k])?' on':''}" data-k="${L[k]}"><span class="l">${L[k]}</span><span>${esc(t)}</span></button>`).join('')}
+  <div class="q">${esc(q.p)}</div>${figHTML(q)}
+  <div class="hint">${hintTxt(q)}</div>
+  ${q.o.map((t,k)=>`<button class="opt${multi?' multi':''}${sel.includes(L[k])?' on':''}" data-k="${L[k]}"><span class="l">${L[k]}</span>${optInner(q,L[k])}</button>`).join('')}
   </div>
   <div class="dots">${S.ids.map((id,k)=>`<button data-j="${k}" class="${(S.a[id]||[]).length?'a':''} ${k===S.i?'c':''}">${k+1}</button>`).join('')}</div>`;
   app.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{
@@ -144,7 +162,8 @@ function finish(){
   let s=0;const wrong=[];
   S.ids.forEach(id=>{const q=byId(id);if(isRight(q,S.a[id]))s+=pts(q);else wrong.push(q)});
   const ok=s===MAX, ans=S.a;
-  store.h.push({t:Date.now(),s});store.h=store.h.slice(-50);store.cur=null;save(store);
+  store.h.push({t:Date.now(),s});store.h=store.h.slice(-50);store.cur=null;
+  wrong.forEach(q=>{if(!store.err.includes(q.id))store.err.push(q.id)});save(store);
   nav.hidden=false;hdr.textContent='';
   app.innerHTML=`<div class="card result"><p class="muted">Tu puntaje</p><div class="big ${ok?'pass':'fail'}">${s}<span style="font-size:24px">/${MAX}</span></div>
   ${ok?`<div class="banner ok">¡Aprobado con el 100%! Estás listo para el examen municipal.</div>`:
@@ -152,14 +171,53 @@ function finish(){
   <p class="small muted">${s>=33?'En el examen real (mínimo 33 puntos) este puntaje te habría alcanzado para aprobar.':'En el examen real se necesitan al menos 33 puntos.'}</p></div>`+
   (wrong.length?`<div class="card"><h2 style="font-size:18px">Tus errores</h2>`+wrong.map(q=>{
     const y=(ans[q.id]||[]).sort();
-    return `<div class="rev"><div>${q.d?'<span class="tag">★ Doble</span>':''}</div><div class="q" style="font-size:16px">${esc(q.p)}</div>
-    <div class="ans y">Tu respuesta: ${y.map(k=>`${k}) ${esc(q.o[L.indexOf(k)])}`).join(' · ')||'—'}</div>
-    <div class="ans c">Correcta: ${q.c.map(k=>`${k}) ${esc(q.o[L.indexOf(k)])}`).join(' · ')}</div>
+    return `<div class="rev"><div>${q.d?'<span class="tag">★ Doble</span>':''}</div><div class="q" style="font-size:16px">${esc(q.p)}</div>${figHTML(q)}
+    <div class="ans y">Tu respuesta: ${y.map(k=>optShort(q,k)).join(' · ')||'—'}</div>
+    <div class="ans c">Correcta: ${q.c.map(k=>optShort(q,k)).join(' · ')}</div>
     <div class="ex">💡 ${esc(q.e)}</div></div>`}).join('')+`</div>`:'');
-  navin.innerHTML=ok?`<button class="btn2" id="home">Inicio</button><button class="btn" id="again">Otro test</button>`:`<button class="btn" id="again">Repetir test</button>`;
+  navin.innerHTML=ok?`<button class="btn2" id="home">Inicio</button><button class="btn" id="again">Otro test</button>`:`<button class="btn2" id="study">Estudiar errores</button><button class="btn" id="again">Repetir test</button>`;
   document.getElementById('again').onclick=newTest;
+  const st=document.getElementById('study');if(st)st.onclick=()=>startStudy(wrong.map(q=>q.id));
   const hm=document.getElementById('home');if(hm)hm.onclick=home;
   window.scrollTo(0,0);
+}
+// ---- Modo estudio: corrige las preguntas malas con respuesta y explicación inmediata ----
+let ST=null;
+function startStudy(ids){ST={ids:shuffle(ids),i:0,sel:[],done:false,ok:0};renderStudy()}
+function renderStudy(){
+  const q=byId(ST.ids[ST.i]), multi=q.c.length>1, show=ST.done;
+  hdr.textContent=`Estudio ${ST.i+1}/${ST.ids.length}`;
+  const right=show&&isRight(q,ST.sel);
+  app.innerHTML=`<div class="meta"><span>Estudiando tus errores</span><span>${ST.i+1} de ${ST.ids.length}</span></div>
+  <div class="bar"><i style="width:${(ST.i+1)/ST.ids.length*100}%"></i></div>
+  <div class="card">${q.d?'<span class="tag">★ Doble puntaje</span>':''}<span class="tag t">${esc(q.tema)}</span>
+  <div class="q">${esc(q.p)}</div>${figHTML(q)}<div class="hint">${hintTxt(q)}</div>
+  ${q.o.map((t,k)=>{const L1=L[k],on=ST.sel.includes(L1),cor=q.c.includes(L1);
+    const cls=show?(cor?' ok':(on?' no':'')):(on?' on':'');
+    return `<button class="opt${multi?' multi':''}${cls}" data-k="${L1}" ${show?'disabled':''}><span class="l">${L1}</span>${optInner(q,L1)}</button>`}).join('')}
+  ${show?`<div class="fb ${right?'ok':'no'}"><b>${right?'¡Correcto! La sacamos de tu lista de errores.':'Incorrecto. La correcta está marcada en verde.'}</b><div class="ex">💡 ${esc(q.e)}</div></div>`:''}
+  </div>`;
+  if(!show)app.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{const k=b.dataset.k;
+    if(multi){ST.sel=ST.sel.includes(k)?ST.sel.filter(x=>x!==k):ST.sel.concat(k)}else{ST.sel=[k];check();return}
+    renderStudy()});
+  nav.hidden=false;
+  if(!show){navin.innerHTML=`<button class="btn2" id="salir">Salir</button>`+(multi?`<button class="btn" id="chk" ${ST.sel.length?'':'disabled'}>Comprobar</button>`:'');
+    const ck=document.getElementById('chk');if(ck)ck.onclick=check}
+  else{const last=ST.i===ST.ids.length-1;navin.innerHTML=`<button class="btn2" id="salir">Salir</button><button class="btn" id="sig">${last?'Terminar':'Siguiente'}</button>`;
+    document.getElementById('sig').onclick=()=>{if(last)studyEnd();else{ST.i++;ST.sel=[];ST.done=false;renderStudy();window.scrollTo(0,0)}}}
+  document.getElementById('salir').onclick=home;
+}
+function check(){const q=byId(ST.ids[ST.i]);ST.done=true;
+  if(isRight(q,ST.sel)){ST.ok++;store.err=store.err.filter(id=>id!==q.id)}else if(!store.err.includes(q.id))store.err.push(q.id);
+  save(store);renderStudy()}
+function studyEnd(){
+  hdr.textContent='';
+  app.innerHTML=`<div class="card result"><p class="muted">Repaso terminado</p><div class="big pass">${ST.ok}<span style="font-size:24px">/${ST.ids.length}</span></div>
+  <p>${store.err.length?`Te quedan <b>${store.err.length}</b> preguntas por dominar. Puedes repasarlas cuando quieras desde el inicio.`:'¡No te quedan errores pendientes!'}</p></div>`;
+  navin.innerHTML=(store.err.length?`<button class="btn2" id="again2">Repasar de nuevo</button>`:`<button class="btn2" id="inicio">Inicio</button>`)+`<button class="btn" id="nt">Hacer test</button>`;
+  const a2=document.getElementById('again2');if(a2)a2.onclick=()=>startStudy(store.err.slice());
+  const i2=document.getElementById('inicio');if(i2)i2.onclick=home;
+  document.getElementById('nt').onclick=newTest;window.scrollTo(0,0);
 }
 home();
 if('serviceWorker' in navigator&&location.protocol==='https:'){navigator.serviceWorker.register('sw.js').catch(()=>{})}
