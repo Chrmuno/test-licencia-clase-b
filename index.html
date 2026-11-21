@@ -131,7 +131,7 @@ function home(){
   <p class="small muted">Texto oficial de la Ley N° 18.290 (DFL 1 de 2009), desde la Biblioteca del Congreso Nacional. Versión del ${LEY.ver}.</p>
   <a class="btn" style="display:block;text-align:center;text-decoration:none;padding:14px 18px;border-radius:12px" href="${LEY.pdf}" target="_blank" rel="noopener">Descargar PDF</a>
   <p class="small" style="text-align:center;margin-top:10px"><a href="${LEY.web}" target="_blank" rel="noopener" style="color:var(--pri)">Ver en la BCN (siempre la última versión)</a></p></div>`;
-  html+=`<p class="small muted" style="text-align:center">Banco de ${Q.length} preguntas basado en el cuestionario oficial clase B (Municipalidad de Puente Alto).</p>`;
+  html+=`<p class="small muted" style="text-align:center">Banco de ${Q.length} preguntas basado en el cuestionario oficial clase B (Municipalidad de Puente Alto).</p><footer style="text-align:center;font-size:13px;color:var(--muted);border-top:1px solid var(--line);margin-top:18px;padding-top:14px">Creado por <b style="color:var(--ink)">Christian Muñoz</b></footer>`;
   app.innerHTML=html;
   document.getElementById('go').onclick=()=>{if(!store.cur||confirmNew())newTest()};
   const c=document.getElementById('cont');if(c)c.onclick=()=>{S=store.cur;renderQ()};
