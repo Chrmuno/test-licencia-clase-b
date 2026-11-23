@@ -127,6 +127,9 @@ function home(){
   </div>`;
   if(h.length){html+=`<div class="card"><h2 style="font-size:18px">Tus intentos</h2><p class="muted small">Mejor puntaje: ${best}/${MAX} · Aprobados: ${passed} de ${h.length}</p><table class="hist">`+
     h.slice(-10).reverse().map(x=>`<tr><td>${new Date(x.t).toLocaleString('es-CL',{dateStyle:'short',timeStyle:'short'})}</td><td class="${x.s===MAX?'pass':'fail'}">${x.s}/${MAX}</td></tr>`).join('')+`</table></div>`}
+  html+=`<div class="card"><h2 style="font-size:18px">🚗 Simulador de conducción</h2>
+  <p class="small muted">Maneja por una ciudad 3D con semáforos, PARE, CEDA EL PASO, rotonda, zona escolar, pasos de cebra y ambulancias. Incluye examen práctico al 100%.</p>
+  <a class="btn" style="display:block;text-align:center;text-decoration:none;padding:14px 18px;border-radius:12px" href="simulador/">Abrir simulador</a></div>`;
   html+=`<div class="card"><h2 style="font-size:18px">📘 Ley de Tránsito vigente</h2>
   <p class="small muted">Texto oficial de la Ley N° 18.290 (DFL 1 de 2009), desde la Biblioteca del Congreso Nacional. Versión del ${LEY.ver}.</p>
   <a class="btn" style="display:block;text-align:center;text-decoration:none;padding:14px 18px;border-radius:12px" href="${LEY.pdf}" target="_blank" rel="noopener">Descargar PDF</a>
