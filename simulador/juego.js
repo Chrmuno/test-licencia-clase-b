@@ -859,6 +859,9 @@ function updSound() { if (!engG) return; const on = soundOn && running && !pause
 /* ================= CICLO ================= */
 function update(dt) {
   simT += dt;
+  if (running && mode === 'free') Licencia.addSim(dt);
+  if (running && mode === 'free' && !Licencia.full && Licencia.simLeft() <= 0) { endFree(); Licencia.paywall('Se acabaron los 5 minutos diarios de conducción libre de la demo. Con la versión completa manejas sin límite y puedes rendir el examen práctico.', () => show('menu')); return; }
+  if (running && mode === 'free' && !Licencia.full && !PL.warn1 && Licencia.simLeft() <= 60 && (PL.warn1 = true)) toast('Demo: queda 1 minuto de conducción', 'info', 3000);
   ents = [player, ...ais]; if (amb.on) ents.push(amb);
   updPeds(dt);
   for (const a of ais) a.update(dt);
@@ -945,7 +948,7 @@ function startGame(m) {
   setSignal(null); $('score').textContent = m === 'exam' ? 'Examen: 0 faltas' : 'Puntaje 100'; $('score').classList.toggle('hidden', false);
   show(null); $('hud').classList.remove('hidden'); $('ctl').classList.remove('hidden');
   updCamera(0, true); resize(); last = performance.now();
-  toast(m === 'exam' ? 'Abróchate el cinturón 🔒 antes de partir' : 'Abróchate el cinturón 🔒 y a manejar', 'info', 3500);
+  toast(m === 'exam' ? 'Abróchate el cinturón 🔒 antes de partir' : (Licencia.full ? 'Abróchate el cinturón 🔒 y a manejar' : `Demo: te quedan ${Math.ceil(Licencia.simLeft() / 60)} min de conducción hoy. Abróchate el cinturón 🔒`), 'info', 3500);
   try { if (innerWidth < innerHeight && screen.orientation?.lock) document.documentElement.requestFullscreen?.().then(() => screen.orientation.lock('landscape')).catch(() => { }); } catch (e) { }
 }
 function endExam(ok, code) {
@@ -974,6 +977,8 @@ function endFree() {
 
 function show(id) { if (id) $('dash').classList.add('hidden'); for (const s of ['menu', 'signs', 'help', 'brief', 'pause', 'result']) $(s).classList.toggle('hidden', s !== id); }
 function brief(m) {
+  if (m === 'free' && !Licencia.full && Licencia.simLeft() <= 0) { Licencia.paywall('Ya usaste los 5 minutos de conducción libre de hoy. Vuelve mañana o desbloquea la versión completa.', () => brief('free')); return; }
+  if (m === 'exam' && !Licencia.full) { Licencia.paywall('El examen práctico del simulador es parte de la versión completa. En la demo puedes probar 5 minutos de conducción libre.', () => brief('exam')); return; }
   $('briefT').textContent = m === 'exam' ? '🎓 Examen práctico' : '🌆 Conducción libre';
   $('briefB').innerHTML = (m === 'exam'
     ? `<p>Recorre 5 destinos en orden y termina estacionando en el lugar marcado. Sigue la flecha amarilla y el mapa.</p><div class="card"><b>Para aprobar (100%)</b><ul class="ck">
@@ -1032,7 +1037,9 @@ $('resume').onclick = () => { paused = false; show(null); last = performance.now
 $('restart').onclick = () => { startGame(mode); };
 document.querySelectorAll('[data-menu]').forEach(b => b.onclick = () => { if (running && mode === 'free' && paused) { paused = false; endFree(); return; } running = false; paused = false; $('hud').classList.add('hidden'); $('ctl').classList.add('hidden'); $('rot').classList.add('hidden'); show('menu'); });
 document.querySelectorAll('[data-back]').forEach(b => b.onclick = () => show('menu'));
-$('mExam').onclick = () => brief('exam'); $('mFree').onclick = () => brief('free');
+$('mExam').onclick = () => brief('exam');
+const lockUI = () => { $('examLock').textContent = Licencia.full ? '' : '🔒 Versión completa'; };
+lockUI(); document.addEventListener('licencia', lockUI); $('mFree').onclick = () => brief('free');
 $('mSigns').onclick = () => show('signs'); $('mHelp').onclick = () => show('help');
 const KEYS = { ArrowLeft: 'l', KeyA: 'l', ArrowRight: 'r', KeyD: 'r', ArrowUp: 'gas', KeyW: 'gas', ArrowDown: 'brake', KeyS: 'brake', Space: 'brake' };
 addEventListener('keydown', e => {

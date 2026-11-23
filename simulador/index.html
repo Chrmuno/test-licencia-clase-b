@@ -138,7 +138,7 @@ body.cab #msn{top:calc(16px + min(260px,30vw)/3 + env(safe-area-inset-top))}
   <div class="box">
     <h1>🚗 Simulador de conducción</h1>
     <p>Recorre una ciudad con calles, semáforos, señales de tránsito chilenas, pasos de cebra, rotonda, zona escolar y vehículos de emergencia. Cada infracción se explica según la Ley de Tránsito.</p>
-    <button class="mbtn" id="mExam">🎓 Examen práctico<small>Ruta con 5 destinos. Igual que en la app: debes hacerlo al 100%, sin ninguna infracción. Si cometes una, repites.</small></button>
+    <button class="mbtn" id="mExam">🎓 Examen práctico<small>Ruta con 5 destinos. Igual que en la app: debes hacerlo al 100%, sin ninguna infracción. Si cometes una, repites. <b id="examLock"></b></small></button>
     <button class="mbtn" id="mFree">🌆 Conducción libre<small>Maneja por la ciudad, busca destinos y suma puntos. Cada infracción descuenta.</small></button>
     <button class="mbtn alt" id="mSigns">🚦 Señales y reglas del simulador<small>Qué significa cada señal y qué se evalúa.</small></button>
     <button class="mbtn alt" id="mHelp">🎮 Controles<small>Botones en pantalla o teclado.</small></button>
@@ -181,6 +181,7 @@ body.cab #msn{top:calc(16px + min(260px,30vw)/3 + env(safe-area-inset-top))}
 
 <div id="rot" class="hidden">Gira el teléfono para ver mejor la calle ↻</div>
 
+<script src="../licencia.js"></script>
 <script type="module" src="juego.js"></script>
 </body>
 </html>
