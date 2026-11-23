@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="es-CL">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#1f4e79">
+<title>Simulador de Conducción Clase B</title>
+<link rel="icon" href="../icon.svg">
+<style>
+:root{--pri:#1f4e79;--ok:#1a7f37;--bad:#c62828;--ink:#0f172a}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;overflow:hidden;background:#9cc3e6;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;color:var(--ink);user-select:none;-webkit-user-select:none;touch-action:none}
+canvas#gl{position:fixed;inset:0;width:100%;height:100%;display:block}
+.hidden{display:none!important}
+/* HUD */
+#hud{position:fixed;inset:0;pointer-events:none}
+.panel{background:rgba(15,23,42,.72);color:#fff;border-radius:14px;padding:6px 10px;backdrop-filter:blur(4px)}
+#tl{position:absolute;left:max(8px,env(safe-area-inset-left));top:max(8px,env(safe-area-inset-top));display:flex;gap:8px;align-items:center}
+#spd{min-width:84px;text-align:center}
+#spd b{font-size:30px;line-height:1;display:block}
+#spd small{font-size:11px;opacity:.8}
+#lim{width:46px;height:46px}
+#tlight{display:flex;flex-direction:column;gap:3px;background:#111;padding:4px;border-radius:8px}
+#tlight i{width:12px;height:12px;border-radius:50%;background:#333;display:block}
+#tlight i.r.on{background:#ff3b30;box-shadow:0 0 8px #ff3b30}
+#tlight i.y.on{background:#ffcc00;box-shadow:0 0 8px #ffcc00}
+#tlight i.g.on{background:#34c759;box-shadow:0 0 8px #34c759}
+#msn{position:absolute;left:50%;transform:translateX(-50%);top:max(8px,env(safe-area-inset-top));text-align:center;max-width:46vw;font-size:13px;display:flex;align-items:center;gap:8px}
+#arrow{width:30px;height:30px;flex:none;transition:transform .1s linear}
+#tr{position:absolute;right:max(8px,env(safe-area-inset-right));top:max(8px,env(safe-area-inset-top));display:flex;flex-direction:column;align-items:flex-end;gap:6px}
+#mini{width:128px;height:128px;border-radius:12px;background:#4a6b3a;border:2px solid rgba(255,255,255,.7)}
+#score{font-size:13px;font-weight:700}
+.tbtn{pointer-events:auto;background:rgba(15,23,42,.72);color:#fff;border:0;border-radius:10px;width:40px;height:40px;font-size:18px}
+#toast{position:absolute;left:50%;top:22%;transform:translateX(-50%);max-width:86vw;text-align:center;font-weight:700;font-size:15px;padding:10px 14px;border-radius:12px;background:rgba(198,40,40,.92);color:#fff;opacity:0;transition:opacity .25s}
+#toast.ok{background:rgba(26,127,55,.92)}
+#toast.info{background:rgba(31,78,121,.92)}
+#toast.show{opacity:1}
+#emerg{position:absolute;left:50%;top:34%;transform:translateX(-50%);background:#fff;color:#c62828;border:3px solid #c62828;border-radius:12px;padding:8px 12px;font-weight:800;font-size:14px;text-align:center;animation:blink .5s infinite alternate;max-width:80vw}
+@keyframes blink{to{border-color:#1e40af;color:#1e40af}}
+/* controles */
+#ctl{position:fixed;left:0;right:0;bottom:0;padding:0 max(10px,env(safe-area-inset-right)) max(10px,env(safe-area-inset-bottom)) max(10px,env(safe-area-inset-left));display:flex;justify-content:space-between;align-items:flex-end;pointer-events:none}
+.grp{display:flex;gap:10px;align-items:flex-end;pointer-events:auto}
+.cbtn{border:0;border-radius:18px;background:rgba(255,255,255,.28);color:#fff;font-weight:800;font-size:28px;width:78px;height:78px;text-shadow:0 1px 3px #000;border:2px solid rgba(255,255,255,.55);touch-action:none}
+.cbtn.on{background:rgba(255,255,255,.6)}
+#bGas{height:110px;background:rgba(26,127,55,.5);font-size:15px}
+#bBrake{height:90px;background:rgba(198,40,40,.5);font-size:15px}
+#mid{display:flex;gap:6px;pointer-events:auto;margin-bottom:4px;flex-wrap:wrap;justify-content:center;max-width:40vw}
+.sbtn{border:0;border-radius:12px;background:rgba(15,23,42,.72);color:#fff;font-size:18px;min-width:46px;height:46px;padding:0 8px;touch-action:none}
+.sbtn.on{background:#f59e0b;color:#111}
+.sbtn.blk{animation:sig .5s steps(1) infinite}
+@keyframes sig{50%{background:rgba(15,23,42,.72);color:#fff}}
+#belt.need{animation:sig .6s steps(1) infinite;background:#c62828}
+/* pantallas */
+.scr{position:fixed;inset:0;background:linear-gradient(160deg,#1f4e79,#0f2a44);color:#fff;overflow:auto;padding:max(16px,env(safe-area-inset-top)) 16px 24px;display:flex;flex-direction:column;align-items:center;touch-action:pan-y}
+.scr.dim{background:rgba(10,20,35,.82)}
+.box{width:100%;max-width:560px}
+.scr h1{font-size:26px;margin:8px 0 4px}
+.scr h2{font-size:20px;margin:10px 0 6px}
+.scr p{line-height:1.45;margin:6px 0}
+.mbtn{display:block;width:100%;border:0;border-radius:14px;padding:15px 16px;margin:10px 0;font-size:17px;font-weight:700;background:#fff;color:var(--pri);text-align:left;text-decoration:none;cursor:pointer}
+.mbtn small{display:block;font-weight:500;color:#475569;font-size:13px;margin-top:3px}
+.mbtn.alt{background:rgba(255,255,255,.14);color:#fff}
+.mbtn.alt small{color:#cbd5e1}
+.card{background:rgba(255,255,255,.1);border-radius:14px;padding:12px 14px;margin:10px 0}
+.card.bad{background:#fff;color:#111;border-left:6px solid var(--bad)}
+.card.good{background:#fff;color:#111;border-left:6px solid var(--ok)}
+.sg{display:grid;grid-template-columns:64px 1fr;gap:10px;align-items:center;background:rgba(255,255,255,.1);border-radius:12px;padding:8px;margin:8px 0}
+.sg img{width:64px;height:64px;object-fit:contain}
+.sg b{display:block}
+.sg span{font-size:13px;color:#dbe4ee}
+ul.ck{padding-left:20px;margin:6px 0}ul.ck li{margin:4px 0}
+.row{display:flex;gap:10px}.row .mbtn{text-align:center}
+#dash{position:fixed;left:0;right:0;bottom:0;height:44vh;pointer-events:none;background:linear-gradient(to top,#15171b 0%,#24272d 55%,rgba(36,39,45,0) 100%)}
+#dash .g{position:absolute;bottom:27vh;width:15vh;height:15vh}
+#dash .g svg{width:100%;height:100%}
+#gS{left:calc(50% - 25vh)}#gR{left:calc(50% + 10vh)}
+#wheel{position:absolute;left:50%;bottom:-30vh;width:58vh;height:58vh;transform:translateX(-50%);transform-origin:50% 50%}
+#dGearW{position:absolute;left:50%;bottom:30vh;transform:translateX(-50%);color:#7CFC9A;font:800 3.4vh/1 monospace;background:#000;padding:.6vh 1.2vh;border-radius:.8vh}
+.di{position:absolute;bottom:36vh;font-size:3.4vh;color:#2d4a2d}.di.on{color:#3fff6a;text-shadow:0 0 8px #3fff6a}
+#dL{left:calc(50% - 11vh)}#dR{left:calc(50% + 8vh)}
+body.cab #msn{top:calc(16px + min(260px,30vw)/3 + env(safe-area-inset-top))}
+#rot{position:fixed;inset:auto 0 0 0;background:#f59e0b;color:#111;text-align:center;font-size:13px;padding:6px;font-weight:600}
+@media (max-width:700px) and (orientation:portrait){
+  #mini{width:96px;height:96px}
+  #msn{top:calc(150px + env(safe-area-inset-top));max-width:86vw}
+  #rot{inset:0 0 auto 0}
+  .cbtn{width:68px;height:68px}
+  #bGas{height:96px}#bBrake{height:78px}
+  #mid{position:fixed;left:0;right:0;bottom:calc(120px + env(safe-area-inset-bottom));max-width:none}
+  #dash .g{width:24vw;height:24vw;bottom:24vh}#gS{left:3vw}#gR{left:auto;right:3vw}#dGearW{bottom:26vh}.di{bottom:31vh}#dL{left:32vw}#dR{left:auto;right:32vw}
+  #wheel{width:84vw;height:84vw;bottom:-46vw}
+  body.cab #msn{top:calc(150px + env(safe-area-inset-top))}
+}
+</style>
+</head>
+<body>
+<canvas id="gl"></canvas>
+
+<div id="hud" class="hidden">
+  <div id="tl">
+    <div id="spd" class="panel"><b id="kmh">0</b><small>km/h · <span id="gear">D</span></small></div>
+    <img id="lim" alt="Velocidad máxima">
+    <div id="tlight" class="hidden"><i class="r"></i><i class="y"></i><i class="g"></i></div>
+  </div>
+  <div id="msn" class="panel"><svg id="arrow" viewBox="0 0 30 30"><path d="M15 2 L26 26 L15 20 L4 26 Z" fill="#facc15" stroke="#111" stroke-width="1.5"/></svg><div><b id="msnT">Misión</b><div id="msnD" style="opacity:.85"></div></div></div>
+  <div id="tr">
+    <canvas id="mini" width="256" height="256"></canvas>
+    <div id="score" class="panel">Puntaje 100</div>
+    <div style="display:flex;gap:6px"><button class="tbtn" id="snd" aria-label="Sonido">🔊</button><button class="tbtn" id="pauseB" aria-label="Pausa">⏸</button></div>
+  </div>
+  <div id="toast"></div>
+  <div id="emerg" class="hidden">🚑 Vehículo de emergencia: oríllate a la derecha y detente</div>
+</div>
+
+<div id="dash" class="hidden">
+  <div class="g" id="gS"><svg viewBox="0 0 120 120"><circle cx="60" cy="60" r="56" fill="#0b0c0f" stroke="#555" stroke-width="3"/><line x1="60" y1="10" x2="60" y2="18" stroke="#ddd" stroke-width="2" transform="rotate(-120.0 60 60)"/><line x1="60" y1="10" x2="60" y2="15" stroke="#ddd" stroke-width="1" transform="rotate(-105.0 60 60)"/><line x1="60" y1="10" x2="60" y2="18" stroke="#ddd" stroke-width="2" transform="rotate(-90.0 60 60)"/><line x1="60" y1="10" x2="60" y2="15" stroke="#ddd" stroke-width="1" transform="rotate(-75.0 60 60)"/><line x1="60" y1="10" x2="60" y2="18" stroke="#ddd" stroke-width="2" transform="rotate(-60.0 60 60)"/><line x1="60" y1="10" x2="60" y2="15" stroke="#ddd" stroke-width="1" transform="rotate(-45.0 60 60)"/><line x1="60" y1="10" x2="60" y2="18" stroke="#ddd" stroke-width="2" transform="rotate(-30.0 60 60)"/><line x1="60" y1="10" x2="60" y2="15" stroke="#ddd" stroke-width="1" transform="rotate(-15.0 60 60)"/><line x1="60" y1="10" x2="60" y2="18" stroke="#ddd" stroke-width="2" transform="rotate(0.0 60 60)"/><line x1="60" y1="10" x2="60" y2="15" stroke="#ddd" stroke-width="1" transform="rotate(15.0 60 60)"/><line x1="60" y1="10" x2="60" y2="18" stroke="#ddd" stroke-width="2" transform="rotate(30.0 60 60)"/><line x1="60" y1="10" x2="60" y2="15" stroke="#ddd" stroke-width="1" transform="rotate(45.0 60 60)"/><line x1="60" y1="10" x2="60" y2="18" stroke="#ddd" stroke-width="2" transform="rotate(60.0 60 60)"/><line x1="60" y1="10" x2="60" y2="15" stroke="#ddd" stroke-width="1" transform="rotate(75.0 60 60)"/><line x1="60" y1="10" x2="60" y2="18" stroke="#ddd" stroke-width="2" transform="rotate(90.0 60 60)"/><line x1="60" y1="10" x2="60" y2="15" stroke="#ddd" stroke-width="1" transform="rotate(105.0 60 60)"/><line x1="60" y1="10" x2="60" y2="18" stroke="#ddd" stroke-width="2" transform="rotate(120.0 60 60)"/><text x="27.091034656191326" y="82.0" fill="#eee" font-size="9" text-anchor="middle" font-family="Arial">0</text><text x="22.0" y="63.0" fill="#eee" font-size="9" text-anchor="middle" font-family="Arial">20</text><text x="27.091034656191333" y="44.0" fill="#eee" font-size="9" text-anchor="middle" font-family="Arial">40</text><text x="41.0" y="30.091034656191326" fill="#eee" font-size="9" text-anchor="middle" font-family="Arial">60</text><text x="60.0" y="25.0" fill="#eee" font-size="9" text-anchor="middle" font-family="Arial">80</text><text x="79.0" y="30.091034656191326" fill="#eee" font-size="9" text-anchor="middle" font-family="Arial">100</text><text x="92.90896534380866" y="44.0" fill="#eee" font-size="9" text-anchor="middle" font-family="Arial">120</text><text x="98.0" y="63.0" fill="#eee" font-size="9" text-anchor="middle" font-family="Arial">140</text><text x="92.90896534380867" y="82.0" fill="#eee" font-size="9" text-anchor="middle" font-family="Arial">160</text><text x="60" y="92" fill="#aaa" font-size="8" text-anchor="middle" font-family="Arial">km/h</text><g id="needleS" transform="rotate(-120 60 60)"><line x1="60" y1="60" x2="60" y2="16" stroke="#ff4d2e" stroke-width="3" stroke-linecap="round"/></g><circle cx="60" cy="60" r="5" fill="#333"/></svg></div>
+  <div class="g" id="gR"><svg viewBox="0 0 120 120"><circle cx="60" cy="60" r="56" fill="#0b0c0f" stroke="#555" stroke-width="3"/><line x1="60" y1="10" x2="60" y2="18" stroke="#ddd" stroke-width="2" transform="rotate(-120.0 60 60)"/><line x1="60" y1="10" x2="60" y2="15" stroke="#ddd" stroke-width="1" transform="rotate(-102.85714285714286 60 60)"/><line x1="60" y1="10" x2="60" y2="18" stroke="#ddd" stroke-width="2" transform="rotate(-85.71428571428572 60 60)"/><line x1="60" y1="10" x2="60" y2="15" stroke="#ddd" stroke-width="1" transform="rotate(-68.57142857142857 60 60)"/><line x1="60" y1="10" x2="60" y2="18" stroke="#ddd" stroke-width="2" transform="rotate(-51.42857142857143 60 60)"/><line x1="60" y1="10" x2="60" y2="15" stroke="#ddd" stroke-width="1" transform="rotate(-34.28571428571429 60 60)"/><line x1="60" y1="10" x2="60" y2="18" stroke="#ddd" stroke-width="2" transform="rotate(-17.14285714285714 60 60)"/><line x1="60" y1="10" x2="60" y2="15" stroke="#ddd" stroke-width="1" transform="rotate(0.0 60 60)"/><line x1="60" y1="10" x2="60" y2="18" stroke="#ddd" stroke-width="2" transform="rotate(17.14285714285714 60 60)"/><line x1="60" y1="10" x2="60" y2="15" stroke="#ddd" stroke-width="1" transform="rotate(34.28571428571428 60 60)"/><line x1="60" y1="10" x2="60" y2="18" stroke="#ddd" stroke-width="2" transform="rotate(51.428571428571416 60 60)"/><line x1="60" y1="10" x2="60" y2="15" stroke="#ddd" stroke-width="1" transform="rotate(68.57142857142858 60 60)"/><line x1="60" y1="10" x2="60" y2="18" stroke="#ddd" stroke-width="2" transform="rotate(85.71428571428572 60 60)"/><line x1="60" y1="10" x2="60" y2="15" stroke="#ddd" stroke-width="1" transform="rotate(102.85714285714286 60 60)"/><line x1="60" y1="10" x2="60" y2="18" stroke="#ddd" stroke-width="2" transform="rotate(120.0 60 60)"/><text x="27.091034656191326" y="82.0" fill="#eee" font-size="9" text-anchor="middle" font-family="Arial">0</text><text x="22.106255707115153" y="60.16025644371588" fill="#eee" font-size="9" text-anchor="middle" font-family="Arial">1</text><text x="30.290403666214868" y="39.30738752936813" fill="#eee" font-size="9" text-anchor="middle" font-family="Arial">2</text><text x="48.799303372385644" y="26.688233380126647" fill="#eee" font-size="9" text-anchor="middle" font-family="Arial">3</text><text x="71.20069662761436" y="26.688233380126647" fill="#eee" font-size="9" text-anchor="middle" font-family="Arial">4</text><text x="89.70959633378513" y="39.307387529368114" fill="#eee" font-size="9" text-anchor="middle" font-family="Arial">5</text><text x="97.89374429288485" y="60.16025644371588" fill="#eee" font-size="9" text-anchor="middle" font-family="Arial">6</text><text x="92.90896534380867" y="82.0" fill="#eee" font-size="9" text-anchor="middle" font-family="Arial">7</text><text x="60" y="92" fill="#aaa" font-size="8" text-anchor="middle" font-family="Arial">x1000 rpm</text><g id="needleR" transform="rotate(-120 60 60)"><line x1="60" y1="60" x2="60" y2="16" stroke="#ff4d2e" stroke-width="3" stroke-linecap="round"/></g><circle cx="60" cy="60" r="5" fill="#333"/></svg></div>
+  <span class="di" id="dL">◀</span><span class="di" id="dR">▶</span><div id="dGearW">D<span id="dGear">N</span></div>
+  <svg id="wheel" viewBox="0 0 200 200"><circle cx="100" cy="100" r="88" fill="none" stroke="#1b1b1e" stroke-width="18"/><circle cx="100" cy="100" r="88" fill="none" stroke="#2c2c31" stroke-width="4"/>
+  <path d="M14 100 L70 108 L80 130 L120 130 L130 108 L186 100" fill="none" stroke="#1b1b1e" stroke-width="16"/><path d="M100 130 L100 186" stroke="#1b1b1e" stroke-width="16"/>
+  <circle cx="100" cy="112" r="24" fill="#26262a"/><rect x="93" y="10" width="14" height="10" fill="#c62828"/></svg>
+</div>
+<div id="ctl" class="hidden">
+  <div class="grp"><button class="cbtn" id="bL" aria-label="Izquierda">◀</button><button class="cbtn" id="bR" aria-label="Derecha">▶</button></div>
+  <div id="mid">
+    <button class="sbtn" id="sigL" aria-label="Intermitente izquierdo">⬅</button>
+    <button class="sbtn" id="gearB" aria-label="Marcha D o R">D</button>
+    <button class="sbtn" id="belt" aria-label="Cinturón">🔒 Cinturón</button>
+    <button class="sbtn" id="cam" aria-label="Cámara">🎥</button>
+    <button class="sbtn" id="horn" aria-label="Bocina">📯</button>
+    <button class="sbtn" id="tiltB" aria-label="Volante por inclinación">📱↻</button>
+    <button class="sbtn" id="sigR" aria-label="Intermitente derecho">➡</button>
+  </div>
+  <div class="grp"><button class="cbtn" id="bBrake">FRENO</button><button class="cbtn" id="bGas">ACELERAR</button></div>
+</div>
+
+<div id="menu" class="scr">
+  <div class="box">
+    <h1>🚗 Simulador de conducción</h1>
+    <p>Recorre una ciudad con calles, semáforos, señales de tránsito chilenas, pasos de cebra, rotonda, zona escolar y vehículos de emergencia. Cada infracción se explica según la Ley de Tránsito.</p>
+    <button class="mbtn" id="mExam">🎓 Examen práctico<small>Ruta con 5 destinos. Igual que en la app: debes hacerlo al 100%, sin ninguna infracción. Si cometes una, repites.</small></button>
+    <button class="mbtn" id="mFree">🌆 Conducción libre<small>Maneja por la ciudad, busca destinos y suma puntos. Cada infracción descuenta.</small></button>
+    <button class="mbtn alt" id="mSigns">🚦 Señales y reglas del simulador<small>Qué significa cada señal y qué se evalúa.</small></button>
+    <button class="mbtn alt" id="mHelp">🎮 Controles<small>Botones en pantalla o teclado.</small></button>
+    <button class="mbtn alt" id="mQual">Calidad gráfica</button>
+    <a class="mbtn alt" href="../">📝 Volver al test teórico</a>
+    <p style="font-size:12px;opacity:.7;text-align:center;margin-top:16px">Juego educativo. No reemplaza la clase práctica en una escuela de conductores.</p>
+  </div>
+</div>
+
+<div id="signs" class="scr hidden"><div class="box"><h1>Señales y reglas</h1><div id="signList"></div><button class="mbtn" data-back>Volver</button></div></div>
+
+<div id="help" class="scr hidden"><div class="box">
+  <h1>Controles</h1>
+  <div class="card"><b>En el celular</b><ul class="ck">
+  <li>◀ ▶ para girar el volante.</li><li><b>ACELERAR</b> y <b>FRENO</b>. Con el auto detenido, el botón <b>D/R</b> cambia entre avanzar y <b>reversa</b>.</li>
+  <li>⬅ ➡ intermitentes. Actívalos <b>antes</b> de entrar al cruce donde vas a virar.</li>
+  <li>🔒 abrocha el cinturón antes de partir. 🎥 cambia la cámara (atrás, conductor con tablero y espejo retrovisor, aérea).</li><li>📱↻ volante por inclinación: gira el teléfono como si fuera un volante.</li><li>El auto tiene caja de cambios automática, inercia y freno motor: suelta el acelerador con anticipación para detenerte.</li></ul>
+  <p style="font-size:13px">Se juega mejor con el teléfono horizontal.</p></div>
+  <div class="card"><b>Con teclado</b><ul class="ck"><li>Flechas o W A S D: conducir · R: cambiar entre D y reversa</li><li>Q / E: intermitente izquierdo / derecho</li><li>B: cinturón · C: cámara · H: bocina · P: pausa</li></ul></div>
+  <button class="mbtn" data-back>Volver</button></div></div>
+
+<div id="brief" class="scr dim hidden"><div class="box">
+  <h1 id="briefT">Examen práctico</h1>
+  <div id="briefB"></div>
+  <button class="mbtn" id="briefGo" style="text-align:center">Comenzar</button>
+  <button class="mbtn alt" data-menu style="text-align:center">Menú</button>
+</div></div>
+
+<div id="pause" class="scr dim hidden"><div class="box">
+  <h1>Pausa</h1>
+  <button class="mbtn" id="resume" style="text-align:center">Continuar</button>
+  <button class="mbtn alt" id="restart" style="text-align:center">Reiniciar</button>
+  <button class="mbtn alt" data-menu style="text-align:center">Menú principal</button>
+</div></div>
+
+<div id="result" class="scr dim hidden"><div class="box">
+  <h1 id="resT"></h1><div id="resB"></div>
+  <div class="row"><button class="mbtn alt" data-menu>Menú</button><button class="mbtn" id="again">Repetir</button></div>
+</div></div>
+
+<div id="rot" class="hidden">Gira el teléfono para ver mejor la calle ↻</div>
+
+<script type="module" src="juego.js"></script>
+</body>
+</html>
