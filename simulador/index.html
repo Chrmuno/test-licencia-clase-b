@@ -70,6 +70,15 @@ canvas#gl{position:fixed;inset:0;width:100%;height:100%;display:block}
 .sg span{font-size:13px;color:#dbe4ee}
 ul.ck{padding-left:20px;margin:6px 0}ul.ck li{margin:4px 0}
 .row{display:flex;gap:10px}.row .mbtn{text-align:center}
+#dash{position:fixed;left:0;right:0;bottom:0;height:44vh;pointer-events:none;background:linear-gradient(to top,#15171b 0%,#24272d 55%,rgba(36,39,45,0) 100%)}
+#dash .g{position:absolute;bottom:27vh;width:15vh;height:15vh}
+#dash .g svg{width:100%;height:100%}
+#gS{left:calc(50% - 25vh)}#gR{left:calc(50% + 10vh)}
+#wheel{position:absolute;left:50%;bottom:-30vh;width:58vh;height:58vh;transform:translateX(-50%);transform-origin:50% 50%}
+#dGearW{position:absolute;left:50%;bottom:30vh;transform:translateX(-50%);color:#7CFC9A;font:800 3.4vh/1 monospace;background:#000;padding:.6vh 1.2vh;border-radius:.8vh}
+.di{position:absolute;bottom:36vh;font-size:3.4vh;color:#2d4a2d}.di.on{color:#3fff6a;text-shadow:0 0 8px #3fff6a}
+#dL{left:calc(50% - 11vh)}#dR{left:calc(50% + 8vh)}
+body.cab #msn{top:calc(16px + min(260px,30vw)/3 + env(safe-area-inset-top))}
 #rot{position:fixed;inset:auto 0 0 0;background:#f59e0b;color:#111;text-align:center;font-size:13px;padding:6px;font-weight:600}
 @media (max-width:700px) and (orientation:portrait){
   #mini{width:96px;height:96px}
@@ -78,6 +87,9 @@ ul.ck{padding-left:20px;margin:6px 0}ul.ck li{margin:4px 0}
   .cbtn{width:68px;height:68px}
   #bGas{height:96px}#bBrake{height:78px}
   #mid{position:fixed;left:0;right:0;bottom:calc(120px + env(safe-area-inset-bottom));max-width:none}
+  #dash .g{width:24vw;height:24vw;bottom:24vh}#gS{left:3vw}#gR{left:auto;right:3vw}#dGearW{bottom:26vh}.di{bottom:31vh}#dL{left:32vw}#dR{left:auto;right:32vw}
+  #wheel{width:84vw;height:84vw;bottom:-46vw}
+  body.cab #msn{top:calc(150px + env(safe-area-inset-top))}
 }
 </style>
 </head>
@@ -100,13 +112,23 @@ ul.ck{padding-left:20px;margin:6px 0}ul.ck li{margin:4px 0}
   <div id="emerg" class="hidden">🚑 Vehículo de emergencia: oríllate a la derecha y detente</div>
 </div>
 
+<div id="dash" class="hidden">
+  <div class="g" id="gS"><svg viewBox="0 0 120 120"><circle cx="60" cy="60" r="56" fill="#0b0c0f" stroke="#555" stroke-width="3"/><line x1="60" y1="10" x2="60" y2="18" stroke="#ddd" stroke-width="2" transform="rotate(-120.0 60 60)"/><line x1="60" y1="10" x2="60" y2="15" stroke="#ddd" stroke-width="1" transform="rotate(-105.0 60 60)"/><line x1="60" y1="10" x2="60" y2="18" stroke="#ddd" stroke-width="2" transform="rotate(-90.0 60 60)"/><line x1="60" y1="10" x2="60" y2="15" stroke="#ddd" stroke-width="1" transform="rotate(-75.0 60 60)"/><line x1="60" y1="10" x2="60" y2="18" stroke="#ddd" stroke-width="2" transform="rotate(-60.0 60 60)"/><line x1="60" y1="10" x2="60" y2="15" stroke="#ddd" stroke-width="1" transform="rotate(-45.0 60 60)"/><line x1="60" y1="10" x2="60" y2="18" stroke="#ddd" stroke-width="2" transform="rotate(-30.0 60 60)"/><line x1="60" y1="10" x2="60" y2="15" stroke="#ddd" stroke-width="1" transform="rotate(-15.0 60 60)"/><line x1="60" y1="10" x2="60" y2="18" stroke="#ddd" stroke-width="2" transform="rotate(0.0 60 60)"/><line x1="60" y1="10" x2="60" y2="15" stroke="#ddd" stroke-width="1" transform="rotate(15.0 60 60)"/><line x1="60" y1="10" x2="60" y2="18" stroke="#ddd" stroke-width="2" transform="rotate(30.0 60 60)"/><line x1="60" y1="10" x2="60" y2="15" stroke="#ddd" stroke-width="1" transform="rotate(45.0 60 60)"/><line x1="60" y1="10" x2="60" y2="18" stroke="#ddd" stroke-width="2" transform="rotate(60.0 60 60)"/><line x1="60" y1="10" x2="60" y2="15" stroke="#ddd" stroke-width="1" transform="rotate(75.0 60 60)"/><line x1="60" y1="10" x2="60" y2="18" stroke="#ddd" stroke-width="2" transform="rotate(90.0 60 60)"/><line x1="60" y1="10" x2="60" y2="15" stroke="#ddd" stroke-width="1" transform="rotate(105.0 60 60)"/><line x1="60" y1="10" x2="60" y2="18" stroke="#ddd" stroke-width="2" transform="rotate(120.0 60 60)"/><text x="27.091034656191326" y="82.0" fill="#eee" font-size="9" text-anchor="middle" font-family="Arial">0</text><text x="22.0" y="63.0" fill="#eee" font-size="9" text-anchor="middle" font-family="Arial">20</text><text x="27.091034656191333" y="44.0" fill="#eee" font-size="9" text-anchor="middle" font-family="Arial">40</text><text x="41.0" y="30.091034656191326" fill="#eee" font-size="9" text-anchor="middle" font-family="Arial">60</text><text x="60.0" y="25.0" fill="#eee" font-size="9" text-anchor="middle" font-family="Arial">80</text><text x="79.0" y="30.091034656191326" fill="#eee" font-size="9" text-anchor="middle" font-family="Arial">100</text><text x="92.90896534380866" y="44.0" fill="#eee" font-size="9" text-anchor="middle" font-family="Arial">120</text><text x="98.0" y="63.0" fill="#eee" font-size="9" text-anchor="middle" font-family="Arial">140</text><text x="92.90896534380867" y="82.0" fill="#eee" font-size="9" text-anchor="middle" font-family="Arial">160</text><text x="60" y="92" fill="#aaa" font-size="8" text-anchor="middle" font-family="Arial">km/h</text><g id="needleS" transform="rotate(-120 60 60)"><line x1="60" y1="60" x2="60" y2="16" stroke="#ff4d2e" stroke-width="3" stroke-linecap="round"/></g><circle cx="60" cy="60" r="5" fill="#333"/></svg></div>
+  <div class="g" id="gR"><svg viewBox="0 0 120 120"><circle cx="60" cy="60" r="56" fill="#0b0c0f" stroke="#555" stroke-width="3"/><line x1="60" y1="10" x2="60" y2="18" stroke="#ddd" stroke-width="2" transform="rotate(-120.0 60 60)"/><line x1="60" y1="10" x2="60" y2="15" stroke="#ddd" stroke-width="1" transform="rotate(-102.85714285714286 60 60)"/><line x1="60" y1="10" x2="60" y2="18" stroke="#ddd" stroke-width="2" transform="rotate(-85.71428571428572 60 60)"/><line x1="60" y1="10" x2="60" y2="15" stroke="#ddd" stroke-width="1" transform="rotate(-68.57142857142857 60 60)"/><line x1="60" y1="10" x2="60" y2="18" stroke="#ddd" stroke-width="2" transform="rotate(-51.42857142857143 60 60)"/><line x1="60" y1="10" x2="60" y2="15" stroke="#ddd" stroke-width="1" transform="rotate(-34.28571428571429 60 60)"/><line x1="60" y1="10" x2="60" y2="18" stroke="#ddd" stroke-width="2" transform="rotate(-17.14285714285714 60 60)"/><line x1="60" y1="10" x2="60" y2="15" stroke="#ddd" stroke-width="1" transform="rotate(0.0 60 60)"/><line x1="60" y1="10" x2="60" y2="18" stroke="#ddd" stroke-width="2" transform="rotate(17.14285714285714 60 60)"/><line x1="60" y1="10" x2="60" y2="15" stroke="#ddd" stroke-width="1" transform="rotate(34.28571428571428 60 60)"/><line x1="60" y1="10" x2="60" y2="18" stroke="#ddd" stroke-width="2" transform="rotate(51.428571428571416 60 60)"/><line x1="60" y1="10" x2="60" y2="15" stroke="#ddd" stroke-width="1" transform="rotate(68.57142857142858 60 60)"/><line x1="60" y1="10" x2="60" y2="18" stroke="#ddd" stroke-width="2" transform="rotate(85.71428571428572 60 60)"/><line x1="60" y1="10" x2="60" y2="15" stroke="#ddd" stroke-width="1" transform="rotate(102.85714285714286 60 60)"/><line x1="60" y1="10" x2="60" y2="18" stroke="#ddd" stroke-width="2" transform="rotate(120.0 60 60)"/><text x="27.091034656191326" y="82.0" fill="#eee" font-size="9" text-anchor="middle" font-family="Arial">0</text><text x="22.106255707115153" y="60.16025644371588" fill="#eee" font-size="9" text-anchor="middle" font-family="Arial">1</text><text x="30.290403666214868" y="39.30738752936813" fill="#eee" font-size="9" text-anchor="middle" font-family="Arial">2</text><text x="48.799303372385644" y="26.688233380126647" fill="#eee" font-size="9" text-anchor="middle" font-family="Arial">3</text><text x="71.20069662761436" y="26.688233380126647" fill="#eee" font-size="9" text-anchor="middle" font-family="Arial">4</text><text x="89.70959633378513" y="39.307387529368114" fill="#eee" font-size="9" text-anchor="middle" font-family="Arial">5</text><text x="97.89374429288485" y="60.16025644371588" fill="#eee" font-size="9" text-anchor="middle" font-family="Arial">6</text><text x="92.90896534380867" y="82.0" fill="#eee" font-size="9" text-anchor="middle" font-family="Arial">7</text><text x="60" y="92" fill="#aaa" font-size="8" text-anchor="middle" font-family="Arial">x1000 rpm</text><g id="needleR" transform="rotate(-120 60 60)"><line x1="60" y1="60" x2="60" y2="16" stroke="#ff4d2e" stroke-width="3" stroke-linecap="round"/></g><circle cx="60" cy="60" r="5" fill="#333"/></svg></div>
+  <span class="di" id="dL">◀</span><span class="di" id="dR">▶</span><div id="dGearW">D<span id="dGear">N</span></div>
+  <svg id="wheel" viewBox="0 0 200 200"><circle cx="100" cy="100" r="88" fill="none" stroke="#1b1b1e" stroke-width="18"/><circle cx="100" cy="100" r="88" fill="none" stroke="#2c2c31" stroke-width="4"/>
+  <path d="M14 100 L70 108 L80 130 L120 130 L130 108 L186 100" fill="none" stroke="#1b1b1e" stroke-width="16"/><path d="M100 130 L100 186" stroke="#1b1b1e" stroke-width="16"/>
+  <circle cx="100" cy="112" r="24" fill="#26262a"/><rect x="93" y="10" width="14" height="10" fill="#c62828"/></svg>
+</div>
 <div id="ctl" class="hidden">
   <div class="grp"><button class="cbtn" id="bL" aria-label="Izquierda">◀</button><button class="cbtn" id="bR" aria-label="Derecha">▶</button></div>
   <div id="mid">
     <button class="sbtn" id="sigL" aria-label="Intermitente izquierdo">⬅</button>
+    <button class="sbtn" id="gearB" aria-label="Marcha D o R">D</button>
     <button class="sbtn" id="belt" aria-label="Cinturón">🔒 Cinturón</button>
     <button class="sbtn" id="cam" aria-label="Cámara">🎥</button>
     <button class="sbtn" id="horn" aria-label="Bocina">📯</button>
+    <button class="sbtn" id="tiltB" aria-label="Volante por inclinación">📱↻</button>
     <button class="sbtn" id="sigR" aria-label="Intermitente derecho">➡</button>
   </div>
   <div class="grp"><button class="cbtn" id="bBrake">FRENO</button><button class="cbtn" id="bGas">ACELERAR</button></div>
@@ -120,6 +142,7 @@ ul.ck{padding-left:20px;margin:6px 0}ul.ck li{margin:4px 0}
     <button class="mbtn" id="mFree">🌆 Conducción libre<small>Maneja por la ciudad, busca destinos y suma puntos. Cada infracción descuenta.</small></button>
     <button class="mbtn alt" id="mSigns">🚦 Señales y reglas del simulador<small>Qué significa cada señal y qué se evalúa.</small></button>
     <button class="mbtn alt" id="mHelp">🎮 Controles<small>Botones en pantalla o teclado.</small></button>
+    <button class="mbtn alt" id="mQual">Calidad gráfica</button>
     <a class="mbtn alt" href="../">📝 Volver al test teórico</a>
     <p style="font-size:12px;opacity:.7;text-align:center;margin-top:16px">Juego educativo. No reemplaza la clase práctica en una escuela de conductores.</p>
   </div>
@@ -130,11 +153,11 @@ ul.ck{padding-left:20px;margin:6px 0}ul.ck li{margin:4px 0}
 <div id="help" class="scr hidden"><div class="box">
   <h1>Controles</h1>
   <div class="card"><b>En el celular</b><ul class="ck">
-  <li>◀ ▶ para girar el volante.</li><li><b>ACELERAR</b> y <b>FRENO</b>. Mantén FRENO detenido para ir en <b>reversa</b> (R).</li>
+  <li>◀ ▶ para girar el volante.</li><li><b>ACELERAR</b> y <b>FRENO</b>. Con el auto detenido, el botón <b>D/R</b> cambia entre avanzar y <b>reversa</b>.</li>
   <li>⬅ ➡ intermitentes. Actívalos <b>antes</b> de entrar al cruce donde vas a virar.</li>
-  <li>🔒 abrocha el cinturón antes de partir. 🎥 cambia la cámara.</li></ul>
+  <li>🔒 abrocha el cinturón antes de partir. 🎥 cambia la cámara (atrás, conductor con tablero y espejo retrovisor, aérea).</li><li>📱↻ volante por inclinación: gira el teléfono como si fuera un volante.</li><li>El auto tiene caja de cambios automática, inercia y freno motor: suelta el acelerador con anticipación para detenerte.</li></ul>
   <p style="font-size:13px">Se juega mejor con el teléfono horizontal.</p></div>
-  <div class="card"><b>Con teclado</b><ul class="ck"><li>Flechas o W A S D: conducir (S/↓ detenido = reversa)</li><li>Q / E: intermitente izquierdo / derecho</li><li>B: cinturón · C: cámara · H: bocina · P: pausa</li></ul></div>
+  <div class="card"><b>Con teclado</b><ul class="ck"><li>Flechas o W A S D: conducir · R: cambiar entre D y reversa</li><li>Q / E: intermitente izquierdo / derecho</li><li>B: cinturón · C: cámara · H: bocina · P: pausa</li></ul></div>
   <button class="mbtn" data-back>Volver</button></div></div>
 
 <div id="brief" class="scr dim hidden"><div class="box">
