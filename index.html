@@ -85,6 +85,7 @@ button{font:inherit;border:0;border-radius:12px;padding:14px 18px;cursor:pointer
 <div class="nav" id="nav" hidden><div class="in" id="navin"></div></div>
 <script src="data.js"></script>
 <script src="imagenes.js"></script>
+<script src="licencia.js"></script>
 <script>
 (function(){
 const N_TOTAL=35, N_DOBLE=3, MAX=N_TOTAL+N_DOBLE, KEY='testClaseB.v1';
@@ -103,6 +104,8 @@ let store=load();
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
 function newTest(){
+  if(!Licencia.full&&Licencia.testsLeftToday()<=0){Licencia.paywall('En la demo puedes hacer 1 test por día. Vuelve mañana o desbloquea la versión completa para practicar sin límite.',newTest);return}
+  Licencia.useTest();
   const dob=shuffle(Q.filter(q=>q.d)).slice(0,N_DOBLE);
   const rest=shuffle(Q.filter(q=>!q.d)).slice(0,N_TOTAL-N_DOBLE);
   S={ids:shuffle(dob.concat(rest)).map(q=>q.id),a:{},i:0,start:Date.now()};
@@ -121,6 +124,7 @@ function home(){
   let html=`<div class="card"><h2>Practica tu examen teórico</h2>
   <p class="muted">Mismo formato que el examen municipal clase B de CONASET.</p>
   <div class="facts"><div class="fact"><b>${N_TOTAL}</b><span>preguntas</span></div><div class="fact"><b>${MAX}</b><span>puntos</span></div><div class="fact"><b>100%</b><span>para aprobar</span></div></div>
+  ${Licencia.full?`<p class="small" style="color:var(--ok);font-weight:600">⭐ Versión completa activada</p>`:`<div style="background:var(--warn-bg);color:var(--warn);border-radius:10px;padding:10px 12px;margin:10px 0;font-size:14px">Estás usando la <b>demo</b>: ${Licencia.testsLeftToday()>0?'te queda 1 test hoy':'ya usaste tu test de hoy'}. <a href="#" id="getFull" style="color:var(--pri);font-weight:700">Obtener versión completa</a></div>`}
   <p class="small muted">${N_DOBLE} preguntas valen doble (marcadas con ★). En el examen real se aprueba con 33 puntos; aquí te exigimos ${MAX} de ${MAX} para que llegues seguro. Si no logras el 100%, debes repetir el test.</p>
   ${store.cur?`<button class="btn" id="cont">Continuar test en curso</button><p></p><button class="btn2" style="width:100%" id="go">Empezar uno nuevo</button>`:`<button class="btn" id="go">Comenzar test</button>`}
   ${store.err.length?`<p></p><button class="btn2" style="width:100%" id="studyAll">Estudiar mis errores (${store.err.length})</button>`:''}
@@ -129,11 +133,13 @@ function home(){
   if(h.length){html+=`<div class="card"><h2 style="font-size:18px">Tus intentos</h2><p class="muted small">Mejor puntaje: ${best}/${MAX} · Aprobados: ${passed} de ${h.length}</p><table class="hist">`+
     h.slice(-10).reverse().map(x=>`<tr><td>${new Date(x.t).toLocaleString('es-CL',{dateStyle:'short',timeStyle:'short'})}</td><td class="${x.s===MAX?'pass':'fail'}">${x.s}/${MAX}</td></tr>`).join('')+`</table></div>`}
   html+=`<div class="card"><h2 style="font-size:18px">📘 Ley de Tránsito vigente</h2>
-  <p class="small muted">Texto oficial de la Ley N° 18.290 (DFL 1 de 2009), desde la Biblioteca del Congreso Nacional. Versión del ${LEY.ver}.</p>
-  <a class="btn" style="display:block;text-align:center;text-decoration:none;padding:14px 18px;border-radius:12px" href="${LEY.pdf}" target="_blank" rel="noopener">Descargar PDF</a>
+  <p class="small muted">Texto oficial de la Ley N° 18.290 (DFL 1 de 2009), desde la Biblioteca del Congreso Nacional. Versión del ${LEY.ver}. Puedes escucharla en voz alta, buscar un tema o descargarla.</p>
+  <a class="btn" style="display:block;text-align:center;text-decoration:none;padding:14px 18px;border-radius:12px" href="ley.html">🔊 Escuchar la ley en voz alta</a>
+  <p></p><a class="btn2" style="display:block;width:100%;text-align:center;text-decoration:none;padding:14px 18px;border-radius:12px;font-weight:600" href="${LEY.pdf}" target="_blank" rel="noopener">Descargar PDF</a>
   <p class="small" style="text-align:center;margin-top:10px"><a href="${LEY.web}" target="_blank" rel="noopener" style="color:var(--pri)">Ver en la BCN (siempre la última versión)</a></p></div>`;
   html+=`<p class="small muted" style="text-align:center">Banco de ${Q.length} preguntas basado en el cuestionario oficial clase B (Municipalidad de Puente Alto).</p><footer style="text-align:center;font-size:13px;color:var(--muted);border-top:1px solid var(--line);margin-top:18px;padding-top:14px">Creado por <b style="color:var(--ink)">Christian Muñoz</b></footer>`;
   app.innerHTML=html;
+  const gf=document.getElementById('getFull');if(gf)gf.onclick=e=>{e.preventDefault();Licencia.paywall('',home)};
   document.getElementById('go').onclick=()=>{if(!store.cur||confirmNew())newTest()};
   const c=document.getElementById('cont');if(c)c.onclick=()=>{S=store.cur;renderQ()};
   const sa=document.getElementById('studyAll');if(sa)sa.onclick=()=>startStudy(store.err.slice());
@@ -191,7 +197,7 @@ function finish(){
 }
 // ---- Modo estudio: corrige las preguntas malas con respuesta y explicación inmediata ----
 let ST=null;
-function startStudy(ids){ST={ids:shuffle(ids),i:0,sel:[],done:false,ok:0};renderStudy()}
+function startStudy(ids){if(!Licencia.full){Licencia.paywall('El modo "Estudiar mis errores" es parte de la versión completa.',()=>startStudy(ids));return}ST={ids:shuffle(ids),i:0,sel:[],done:false,ok:0};renderStudy()}
 function renderStudy(){
   const q=byId(ST.ids[ST.i]), multi=q.c.length>1, show=ST.done;
   hdr.textContent=`Estudio ${ST.i+1}/${ST.ids.length}`;
@@ -229,6 +235,7 @@ function studyEnd(){
 }
 home();
 if('serviceWorker' in navigator&&location.protocol==='https:'){navigator.serviceWorker.register('sw.js').catch(()=>{})}
+document.addEventListener('licencia',()=>{if(document.getElementById('go'))home()});
 })();
 </script>
 </body>

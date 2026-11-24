@@ -614,6 +614,7 @@ const INF = {
   rotondaSentido: { t: 'Rotonda en sentido contrario', d: 'En la rotonda se circula en sentido contrario a los punteros del reloj, dejando la isla central a la izquierda.', p: 25 },
   ambulancia: { t: 'No cediste el paso a la ambulancia', d: 'Ante un vehículo de emergencia con sirena y balizas debes orillarte a la derecha y detenerte o reducir la velocidad para dejarlo pasar.', p: 20 },
   cinturon: { t: 'Partiste sin cinturón', d: 'El cinturón de seguridad es obligatorio para el conductor y todos los pasajeros. Abróchalo antes de iniciar la marcha.', p: 10 },
+  pelota: { t: 'No reduciste la velocidad ante la pelota', d: 'Una pelota en la calzada avisa que un niño puede aparecer corriendo detrás de ella. Debes bajar la velocidad de inmediato y estar preparado para detenerte.', p: 25 },
   noest: { t: 'Detenido en zona de NO ESTACIONAR', d: 'La señal "No estacionar" (E tachada) prohíbe dejar el vehículo detenido en ese tramo.', p: 5 },
 };
 
@@ -631,12 +632,13 @@ const PLACES = [
 const EXAM = [PLACES[0], PLACES[1], PLACES[2], PLACES[3], { n: 'Estaciona en el lugar marcado', park: true, ...spotC(BAY.free) }];
 let cps = [], cpi = 0, cpMesh, parkMark, parked = [];
 
-function resetPL() { Object.assign(PL, { inNode: false, entry: null, stoppedAt: null, signal: null, belt: false, beltInf: false, wrongT: 0, owT: 0, rbT: 0, walkT: 0, spT: 0, npT: 0, parkT: 0, limit: 50, cool: {}, rev: false, ambDone: false, nextAmb: 70, hornT: 0 }); }
+function resetPL() { Object.assign(PL, { inNode: false, entry: null, stoppedAt: null, signal: null, belt: false, beltInf: false, wrongT: 0, owT: 0, rbT: 0, walkT: 0, spT: 0, npT: 0, parkT: 0, limit: 50, cool: {}, rev: false, ambDone: false, nextAmb: 70, hornT: 0, pedDone: false, ball: null, warn1: false }); }
 
 function infr(code) {
   const now = simT; if ((PL.cool[code] || -99) > now - 5) return; PL.cool[code] = now;
   const I = INF[code]; log.push({ code, t: now }); beep(220, .35);
   if (mode === 'exam') { endExam(false, code); return; }
+  if (mode === 'sit') { endSit(false, code); return; }
   score = Math.max(0, score - I.p); toast(`⚠️ ${I.t} (−${I.p})`, 'bad', 3200); $('score').textContent = 'Puntaje ' + score;
 }
 let toastT = 0;
@@ -748,7 +750,7 @@ function setSignal(s) { PL.signal = s; $('sigL').classList.toggle('on', s === 'l
 
 /* ================= AMBULANCIA ================= */
 function updAmb(dt) {
-  const wantSpawn = !amb.on && (mode === 'free' ? simT > PL.nextAmb : (cpi >= 2 && !PL.ambDone));
+  const wantSpawn = !amb.on && (mode === 'free' ? simT > PL.nextAmb : mode === 'exam' ? (cpi >= 2 && !PL.ambDone) : (SITC && SITC.amb && simT > 3 && !PL.ambDone));
   if (wantSpawn) {
     const loc = locate(P.x, P.z);
     if ((loc.k === 'H' && loc.j !== 2) || (loc.k === 'V' && loc.i !== 2)) {
@@ -769,7 +771,7 @@ function updAmb(dt) {
   const bl = Math.floor(simT * 6) % 2; amb.lr.color.setHex(bl ? 0xff0000 : 0x330000); amb.lb.color.setHex(bl ? 0x000833 : 0x0044ff);
   const rel = (P.x - amb.x) * amb.d.x + (P.z - amb.z) * amb.d.z, dist = Math.hypot(P.x - amb.x, P.z - amb.z);
   $('emerg').classList.toggle('hidden', !(rel > -5 && rel < 60));
-  if (!amb.passed && rel < 0) { amb.passed = true; if (Math.abs(P.v) * 3.6 > 20 && dist < 12) infr('ambulancia'); else toast('✅ Bien: cediste el paso a la ambulancia', 'ok'); }
+  if (!amb.passed && rel < 0) { amb.passed = true; if (Math.abs(P.v) * 3.6 > 20 && dist < 12) infr('ambulancia'); else { toast('✅ Bien: cediste el paso a la ambulancia', 'ok'); if (mode === 'sit') { endSit(true); return; } } }
   if (sirG && soundOn) { sirG.gain.value = clamp(0.05 * (1 - dist / 120), 0, .05); sir.frequency.value = Math.floor(simT * 1.6) % 2 ? 960 : 700; }
   if (rel < -90 || amb.x < -40 || amb.x > MAXC + 40 || amb.z < -40 || amb.z > MAXC + 40) { amb.on = false; amb.g.visible = false; amb.vx = amb.vz = 0; PL.nextAmb = simT + rnd(60, 100); }
 }
@@ -777,25 +779,155 @@ function updAmb(dt) {
 /* ================= MISIONES ================= */
 function setCP(k) {
   cpi = k; const c = cps[k];
-  if (!c) return;
+  if (!c) { cpMesh.visible = parkMark.visible = false; $('msnT').textContent = SITC ? SITC.t : ''; return; }
   cpMesh.visible = !c.park; parkMark.visible = !!c.park;
   if (!c.park) cpMesh.position.set(c.x, 0, c.z);
-  $('msnT').textContent = (mode === 'exam' ? `Destino ${k + 1} de ${cps.length}: ` : 'Destino: ') + c.n;
+  $('msnT').textContent = (mode === 'exam' ? `Destino ${k + 1} de ${cps.length}: ` : mode === 'sit' ? '' : 'Destino: ') + c.n;
 }
 function updMission(dt) {
-  const c = cps[cpi]; if (!c) return;
+  const c = cps[cpi]; $('arrow').style.visibility = c ? '' : 'hidden'; if (!c) { $('msnD').textContent = ''; return; }
   const dx = c.x - P.x, dz = c.z - P.z, dist = Math.hypot(dx, dz), fx = Math.sin(P.h), fz = Math.cos(P.h);
   const lr = dx * -fz + dz * fx, lf = dx * fx + dz * fz;
   $('arrow').style.transform = `rotate(${Math.atan2(lr, lf) * 180 / Math.PI}deg)`;
   $('msnD').textContent = c.park ? (dist < 15 ? 'Detente dentro del rectángulo verde, alineado con la calle' : Math.round(dist) + ' m') : Math.round(dist) + ' m';
   if (c.park) {
-    if (Math.abs(dx) < 1.7 && Math.abs(dz) < 0.85 && Math.abs(fz) < 0.26 && Math.abs(P.v) < 0.2) { PL.parkT += dt; if (PL.parkT > 1.2) endExam(true); } else PL.parkT = 0;
+    if (Math.abs(dx) < 1.7 && Math.abs(dz) < 0.85 && Math.abs(fz) < 0.26 && Math.abs(P.v) < 0.2) { PL.parkT += dt; if (PL.parkT > 1.2) mode === 'sit' ? endSit(true) : endExam(true); } else PL.parkT = 0;
   } else if (dist < 7) {
     beep(880, .15);
+    if (mode === 'sit') { endSit(true); return; }
     if (mode === 'exam') { toast('✅ Destino alcanzado', 'ok', 1500); setCP(cpi + 1); }
     else { score += 10; $('score').textContent = 'Puntaje ' + score; toast('✅ Destino alcanzado (+10)', 'ok', 1500); let n; do n = pick(PLACES); while (n === c); cps = [n]; setCP(0); }
   }
   cpMesh.rotation.y += dt;
+}
+
+/* ================= SITUACIONES DEL TEST ================= */
+// Cada situación recrea una pregunta del test teórico para practicarla manejando.
+const segPos = (i, j, dx, dz, t) => { const d = { x: dx, z: dz }, r = right(d); return { x: i * S + d.x * t * S + r.x * LO, z: j * S + d.z * t * S + r.z * LO, h: Math.atan2(d.x, d.z), d }; };
+let sitK = 0, SITC = null, sitObj = [];
+function forcePed(key, dist = 30) { // obliga a un peatón a cruzar cuando el auto se acerca
+  const cw = CW.find(c => c.key === key); if (!cw || PL.pedDone) return;
+  const fx = Math.sin(P.h), fz = Math.cos(P.h), rel = (cw.cx - P.x) * fx + (cw.cz - P.z) * fz;
+  if (rel > 0 && rel < dist) {
+    PL.pedDone = true; const sg = Math.sign(fx * cw.u.x + fz * cw.u.z) || 1, ps = PEDS.filter(p => p.cw === cw);
+    ps.forEach((p, k) => { if (k) { p.state = 'wait'; p.t = 25; p.s = Math.sign(p.s || 1) * (HW + 1.6); } });
+    const p = ps[0]; p.s = -sg * (HW + 1.6); p.dir = sg; p.state = 'cross'; p.off = 0;
+  }
+}
+const SIT = [
+  { t: 'Cinturón de seguridad', start: [0, 4, 1, 0, .22], goal: [0, 4, 1, 0, .8], noBelt: true,
+    hint: 'Prepárate para salir y conduce hasta la meta amarilla.',
+    q: '¿Cuándo deben abrocharse el cinturón de seguridad el conductor y los pasajeros?', o: ['Solo cuando se viaja por carretera.', 'Siempre, antes de iniciar la marcha.', 'Solo el conductor y el acompañante.', 'Solo si se va a más de 50 km/h.'], a: 'b',
+    e: 'El cinturón es obligatorio para el conductor y todos los pasajeros, adelante y atrás, en cualquier vía. Se abrocha antes de partir.', ok: 'Te abrochaste el cinturón antes de poner el auto en movimiento.' },
+  { t: 'Señal PARE', start: [2, 2, 0, -1, .3], goal: [2, 1, 0, -1, .5],
+    hint: 'Sigue derecho por esta calle. En el próximo cruce hay un disco PARE.',
+    q: 'Usted llega a un cruce con la señal PARE. ¿Qué debe hacer?', o: ['Reducir la velocidad y pasar si no viene nadie.', 'Detenerse completamente antes de la línea y ceder el paso a quienes circulan por la vía transversal.', 'Tocar la bocina y pasar con precaución.', 'Detenerse solo si viene otro vehículo.'], a: 'b',
+    e: 'El PARE obliga a detener totalmente el vehículo, aunque no venga nadie, y luego a ceder el paso a quienes circulan por la otra vía.', ok: 'Te detuviste por completo antes del cruce y pasaste cuando estaba libre.' },
+  { t: 'Paso de cebra con peatón', start: [3, 3, 1, 0, .08], goal: [3, 3, 1, 0, .85], ped: 'H3_3',
+    hint: 'Sigue derecho. Más adelante hay un paso de cebra.',
+    q: 'Hay peatones cruzando por el paso de cebra. ¿Qué hace usted?', o: ['Continúa a la misma velocidad.', 'Toca la bocina.', 'Pasa el paso de peatones lo más rápido posible.', 'Se detiene.'], a: 'd',
+    e: 'En un paso de cebra los peatones tienen preferencia: deténgase y déjelos terminar de cruzar.', ok: 'Te detuviste y dejaste cruzar al peatón.' },
+  { t: 'Semáforo en rojo', start: [2, 1, 1, 0, .35], goal: [3, 1, 1, 0, .4], setup() { CTRL['3,1'].off = 22; },
+    hint: 'Sigue derecho y cruza el semáforo de la esquina.',
+    q: 'Usted se acerca a un cruce y el semáforo está en rojo. ¿Qué debe hacer?', o: ['Pasar si no vienen vehículos.', 'Detenerse antes de la línea de detención y esperar la luz verde.', 'Reducir la velocidad y cruzar con precaución.', 'Avanzar hasta la mitad del cruce y esperar.'], a: 'b',
+    e: 'La luz roja obliga a detenerse antes de la línea de detención, sin invadir el paso peatonal, y esperar la luz verde. Pasarla es una infracción gravísima.', ok: 'Esperaste la luz verde antes de cruzar.' },
+  { t: 'Ceda el paso', start: [2, 2, 0, 1, .3], goal: [2, 3, 0, 1, .3], setup() { sitAI(1, 3, 1, 0, .45); sitAI(3, 3, -1, 0, .5); },
+    hint: 'Sigue derecho. En el próximo cruce tienes un CEDA EL PASO y vienen autos por la otra calle.',
+    q: 'Usted llega a un cruce con la señal CEDA EL PASO y por la vía transversal se acerca un vehículo. ¿Qué hace?', o: ['Acelera para pasar primero.', 'Reduce la velocidad y, si es necesario, se detiene para dejar pasar al otro vehículo.', 'Pasa, porque usted viene por la derecha.', 'Toca la bocina para que el otro se detenga.'], a: 'b',
+    e: 'CEDA EL PASO obliga a reducir la velocidad y a detenerse si es necesario para dejar pasar a quienes circulan por la vía preferente.', ok: 'Dejaste pasar a los vehículos de la vía preferente.' },
+  { t: 'Viraje con intermitente', start: [3, 4, 1, 0, .25], goal: [4, 4, 0, -1, .5],
+    hint: 'En la esquina debes virar a la izquierda. Señaliza a tiempo (tecla Z o botón ⬅).',
+    q: '¿Cuándo debe activar el intermitente para virar?', o: ['Justo cuando empieza a girar el volante.', 'Con anticipación, antes de llegar al cruce.', 'Solo si vienen otros vehículos.', 'No es necesario en zona urbana.'], a: 'b',
+    e: 'El intermitente se activa con anticipación, antes de llegar al cruce, para avisar a conductores y peatones lo que vas a hacer. Se usa siempre, aunque no veas a nadie.', ok: 'Señalizaste antes de virar.' },
+  { t: 'Rotonda', start: [1, 2, 1, 0, .3], goal: [2, 2, 0, -1, .5],
+    hint: 'Entra a la rotonda y toma la salida que indica la flecha amarilla.',
+    q: 'Al llegar a una rotonda, ¿quién tiene preferencia y cómo se circula?', o: ['Usted, porque va entrando.', 'Los vehículos que ya circulan por la rotonda; se gira dejando la isla central a la izquierda.', 'El vehículo más grande.', 'Quien venga por la derecha; se puede girar en cualquier sentido.'], a: 'b',
+    e: 'Al entrar a una rotonda se cede el paso a quienes ya circulan por ella, y se avanza en sentido contrario a los punteros del reloj, dejando la isla a la izquierda.', ok: 'Cediste el paso y recorriste la rotonda en el sentido correcto.' },
+  { t: 'Zona escolar', start: [1, 2, 0, 1, .12], goal: [1, 2, 0, 1, .88], ped: 'V1_2',
+    hint: 'Atraviesa la zona escolar hasta la meta.',
+    q: 'Usted entra a una zona escolar señalizada con velocidad máxima 30 km/h. ¿Qué hace?', o: ['Mantiene 50 km/h, que es el límite urbano.', 'Reduce a 30 km/h o menos y está atento a niños que crucen.', 'Toca la bocina para avisar que pasa.', 'Acelera para salir rápido de la zona.'], a: 'b',
+    e: 'Una señal de velocidad máxima manda sobre el límite general. En zona escolar se baja a 30 km/h y se extrema la precaución, porque los niños pueden cruzar de improviso.', ok: 'Respetaste los 30 km/h y a los niños en el cruce.' },
+  { t: 'Pelota en la calzada', start: [1, 4, 1, 0, .5], goal: [2, 4, 1, 0, .8], ball: true,
+    hint: 'Sigue derecho junto a los autos estacionados.',
+    q: 'Usted va conduciendo al lado de una fila de autos estacionados. De pronto ve una pelota rebotando en la calzada un poco más adelante. ¿Qué debería hacer?', o: ['Continuar a la misma velocidad, tocando la bocina.', 'Continuar a la misma velocidad, pero encendiendo y apagando sus luces.', 'Detenerse y señalar con la mano para que los niños crucen a recoger la pelota.', 'Disminuir la velocidad y estar preparado para detenerse si aparece un niño.'], a: 'd',
+    e: 'Detrás de una pelota puede aparecer un niño corriendo: baje la velocidad y prepárese para detenerse.', ok: 'Bajaste la velocidad y te detuviste ante el niño.' },
+  { t: 'Ambulancia con sirena', start: [0, 4, 1, 0, .22], amb: true,
+    hint: 'Conduce por la avenida a velocidad normal y atento a lo que pasa detrás.',
+    q: 'Escucha la sirena de una ambulancia que se acerca por detrás. ¿Qué hace?', o: ['Acelera para no estorbarla.', 'Se orilla a la derecha y reduce la velocidad o se detiene para dejarla pasar.', 'Sigue igual, porque ella debe adelantarlo.', 'Frena de golpe en medio de la pista.'], a: 'b',
+    e: 'Ante un vehículo de emergencia con sirena y balizas encendidas hay que orillarse a la derecha y detenerse o reducir la velocidad para dejarlo pasar.', ok: 'Te orillaste y dejaste pasar a la ambulancia.' },
+  { t: 'No virar a la izquierda', start: [2, 3, 1, 0, .3], goal: [3, 3, 1, 0, .3], setup() { CTRL['3,3'].off = 0; },
+    hint: 'Querías virar a la izquierda en el semáforo, pero mira la señal del cruce. Llega a la meta respetándola.',
+    q: 'En el cruce donde quería virar a la izquierda hay una señal "No virar a la izquierda". ¿Qué hace?', o: ['Vira igual si no viene nadie.', 'Sigue derecho y busca otra ruta para llegar.', 'Se detiene en el cruce hasta que pueda virar.', 'Vira en U para devolverse.'], a: 'b',
+    e: 'Las señales de prohibición (círculo rojo) se respetan siempre. Si no puede virar, siga derecho y busque otra ruta permitida.', ok: 'Respetaste la prohibición y seguiste derecho.' },
+  { t: 'Estacionar', start: [1, 4, 1, 0, .7], park: true,
+    hint: 'Estaciona en el espacio libre marcado en verde, entre los autos estacionados.',
+    q: 'Al estacionar en la calle, ¿cómo debe quedar su vehículo?', o: ['En cualquier sentido, si hay espacio.', 'Al costado derecho, paralelo a la acera y en el sentido del tránsito.', 'En doble fila, si es por poco tiempo.', 'Con dos ruedas sobre la vereda.'], a: 'b',
+    e: 'Se estaciona al costado derecho, paralelo a la acera, en el sentido del tránsito y sin obstaculizar a los demás usuarios de la vía.', ok: 'Estacionaste correctamente en el espacio marcado.' },
+];
+function sitAI(i, j, dx, dz, t) { const a = new AI(); a.setLane(i, j, { x: dx, z: dz }, t); a.v = 8; ais.push(a); }
+function sitDone() { try { return JSON.parse(localStorage.getItem('sim_sit') || '[]'); } catch (e) { return []; } }
+const sitFree = k => Licencia.full || k < 3;
+function sitClean() { for (const o of sitObj) scene.remove(o); sitObj = []; }
+function sitStart(s) {
+  const st = segPos(...s.start); P.x = st.x; P.z = st.z; P.h = st.h;
+  for (const a of ais) scene.remove(a.car.g); ais = []; s.setup && s.setup(); spawnAIs(14);
+  if (s.goal) { const g = segPos(...s.goal); cps = [{ n: 'Meta: ' + s.t, x: g.x, z: g.z }]; }
+  else if (s.park) cps = [{ n: 'Estaciona en el lugar marcado', park: true, ...spotC(BAY.free) }];
+  else cps = [];
+  PL.belt = !s.noBelt;
+  if (s.ball) { // pelota y niño que salen entre los autos estacionados
+    const ball = new THREE.Mesh(new THREE.SphereGeometry(.26, 14, 10), new THREE.MeshLambertMaterial({ color: 0xff6d00 }));
+    const kid = new THREE.Group(); const leg = new THREE.Mesh(gPedLeg, M(0x2b3a55)); leg.position.y = .4; kid.add(leg);
+    const body = new THREE.Mesh(gPedBody, M(0xffeb3b)); body.position.y = 1.3; kid.add(body); const head = new THREE.Mesh(gPedHead, M(0xe0ac69)); head.position.y = 2; kid.add(head); kid.scale.setScalar(.62);
+    ball.visible = kid.visible = false; scene.add(ball, kid); sitObj.push(ball, kid);
+    PL.ball = { ball, kid, x: spotC(BAY.free).x, t: -1, bz: 4 * S + HW + 1.4, kz: 4 * S + HW + 1.6 };
+  }
+}
+function sitTick(dt) {
+  const s = SITC; if (!s) return;
+  if (s.ped) forcePed(s.ped, s.ped === 'V1_2' ? 26 : 30);
+  const B = PL.ball;
+  if (B) {
+    if (B.t < 0 && P.x > B.x - 30) { B.t = 0; B.ball.visible = true; }
+    if (B.t >= 0) {
+      B.t += dt; const top = 4 * S - HW - 3;
+      if (B.bz > top) { B.bz -= 3.2 * dt; B.ball.position.set(B.x + .6, .26 + Math.abs(Math.sin(B.t * 6)) * .5, B.bz); B.ball.rotation.x -= dt * 12; } else B.ball.visible = false;
+      if (B.t > 1.3 && B.kz > top) { B.kid.visible = true; B.kz -= 1.35 * dt; B.kid.position.set(B.x, Math.abs(Math.sin(B.t * 9)) * .06, B.kz); B.kid.rotation.y = Math.PI; }
+      else if (B.kz <= top) B.kid.visible = false;
+      const onRoad = B.kid.visible && Math.abs(B.kz - 4 * S) < HW + .6;
+      if (B.kid.visible && Math.hypot(P.x - B.x, P.z - B.kz) < 1.5 && Math.abs(P.v) > .5) { infr('atropello'); return; }
+      const near = Math.abs(P.x - B.x) < 2.6;
+      if (near && Math.abs(P.v) > .5 && (onRoad || (B.t < 6 && Math.abs(P.v) * 3.6 > 25))) { infr('pelota'); return; }
+    }
+  }
+}
+function openSits() {
+  const done = sitDone();
+  $('sitList').innerHTML = SIT.map((s, k) => `<button class="mbtn ${done.includes(k) ? '' : 'alt'}" data-sit="${k}">${done.includes(k) ? '✅' : sitFree(k) ? '▶️' : '🔒'} ${k + 1}. ${s.t}<small>${s.q.length > 90 ? s.q.slice(0, 88) + '…' : s.q}</small></button>`).join('');
+  $('sitList').querySelectorAll('[data-sit]').forEach(b => b.onclick = () => openSit(+b.dataset.sit));
+  $('sitProg').textContent = `Superadas: ${done.length} de ${SIT.length}`;
+  show('sits');
+}
+function openSit(k) {
+  if (!sitFree(k)) { Licencia.paywall('En la demo puedes practicar las 3 primeras situaciones del test. Con la versión completa tienes las ' + SIT.length + '.', () => openSit(k)); return; }
+  sitK = k; const s = SIT[k], L = 'abcdef';
+  $('briefT').textContent = `📝 ${k + 1}. ${s.t}`;
+  $('briefB').innerHTML = `<div class="card"><b>Pregunta del test</b><p>${s.q}</p>${s.o.map((o, i) => `<div class="opt">${L[i]}) ${o}</div>`).join('')}</div>
+    <div class="card"><b>🚗 Ahora demuéstralo manejando</b><p>${s.hint}</p><p style="font-size:13px;opacity:.85">Cualquier infracción termina la situación. Al final verás la respuesta correcta y su explicación.</p></div>`;
+  $('briefGo').onclick = () => { audioInit(); startGame('sit'); };
+  show('brief');
+}
+function endSit(ok, code) {
+  running = false; $('hud').classList.add('hidden'); $('ctl').classList.add('hidden'); $('rot').classList.add('hidden');
+  for (const k in inp) inp[k] = 0; sitClean();
+  const s = SIT[sitK], L = 'abcdef';
+  if (ok) { const d = sitDone(); if (!d.includes(sitK)) d.push(sitK); try { localStorage.setItem('sim_sit', JSON.stringify(d)); } catch (e) { } beep(660, .2); setTimeout(() => beep(990, .3), 200); }
+  $('resT').textContent = ok ? '✅ Situación superada' : '❌ Situación no superada';
+  $('resB').innerHTML = (ok ? `<div class="card good"><b>¡Bien hecho!</b><p>${s.ok}</p></div>` : `<div class="card bad"><b>${INF[code].t}</b><p>${INF[code].d}</p></div>`) +
+    `<div class="card"><b>Pregunta del test</b><p>${s.q}</p>${s.o.map((o, i) => `<div class="opt ${s.a.includes(L[i]) ? 'right' : ''}">${L[i]}) ${o}${s.a.includes(L[i]) ? ' ✔' : ''}</div>`).join('')}<p style="font-size:14px;margin-top:8px">💡 ${s.e}</p></div>`;
+  $('again').onclick = () => { audioInit(); startGame('sit'); };
+  const nx = $('next'); nx.classList.toggle('hidden', sitK >= SIT.length - 1); nx.onclick = () => openSit(sitK + 1);
+  show('result');
 }
 
 /* ================= HUD ================= */
@@ -859,12 +991,17 @@ function updSound() { if (!engG) return; const on = soundOn && running && !pause
 /* ================= CICLO ================= */
 function update(dt) {
   simT += dt;
+  if (running && mode === 'free') Licencia.addSim(dt);
+  if (running && mode === 'free' && !Licencia.full && Licencia.simLeft() <= 0) { endFree(); Licencia.paywall('Se acabaron los 5 minutos diarios de conducción libre de la demo. Con la versión completa manejas sin límite y puedes rendir el examen práctico.', () => show('menu')); return; }
+  if (running && mode === 'free' && !Licencia.full && !PL.warn1 && Licencia.simLeft() <= 60 && (PL.warn1 = true)) toast('Demo: queda 1 minuto de conducción', 'info', 3000);
   ents = [player, ...ais]; if (amb.on) ents.push(amb);
   updPeds(dt);
   for (const a of ais) a.update(dt);
   updPlayer(dt);
   if (!running) return;
+  if (mode === 'sit') { sitTick(dt); if (!running) return; }
   updAmb(dt);
+  if (!running) return;
   updMission(dt);
   updHUD(dt);
 }
@@ -939,13 +1076,15 @@ function spawnAIs(n) {
 function startGame(m) {
   mode = m; running = true; paused = false; score = 100; log = []; simT = 0; resetPL();
   P.x = 18; P.z = 4 * S + LO; P.h = Math.PI / 2; P.v = 0; P.steer = 0;
-  for (const a of ais) scene.remove(a.car.g); ais = []; spawnAIs(16);
+  sitClean(); SITC = m === 'sit' ? SIT[sitK] : null;
   amb.on = false; amb.g.visible = false;
-  cps = m === 'exam' ? EXAM.slice() : [pick(PLACES.slice(0, 5))]; setCP(0);
-  setSignal(null); $('score').textContent = m === 'exam' ? 'Examen: 0 faltas' : 'Puntaje 100'; $('score').classList.toggle('hidden', false);
+  if (SITC) sitStart(SITC);
+  else { for (const a of ais) scene.remove(a.car.g); ais = []; spawnAIs(16); cps = m === 'exam' ? EXAM.slice() : [pick(PLACES.slice(0, 5))]; }
+  setCP(0);
+  setSignal(null); $('score').textContent = m === 'exam' ? 'Examen: 0 faltas' : m === 'sit' ? `Situación ${sitK + 1} de ${SIT.length}` : 'Puntaje 100'; $('score').classList.toggle('hidden', false);
   show(null); $('hud').classList.remove('hidden'); $('ctl').classList.remove('hidden');
   updCamera(0, true); resize(); last = performance.now();
-  toast(m === 'exam' ? 'Abróchate el cinturón 🔒 antes de partir' : 'Abróchate el cinturón 🔒 y a manejar', 'info', 3500);
+  toast(m === 'sit' ? SITC.hint : m === 'exam' ? 'Abróchate el cinturón 🔒 antes de partir' : (Licencia.full ? 'Abróchate el cinturón 🔒 y a manejar' : `Demo: te quedan ${Math.ceil(Licencia.simLeft() / 60)} min de conducción hoy. Abróchate el cinturón 🔒`), 'info', 3500);
   try { if (innerWidth < innerHeight && screen.orientation?.lock) document.documentElement.requestFullscreen?.().then(() => screen.orientation.lock('landscape')).catch(() => { }); } catch (e) { }
 }
 function endExam(ok, code) {
@@ -961,7 +1100,7 @@ function endExam(ok, code) {
     $('resT').textContent = '❌ Examen reprobado';
     $('resB').innerHTML = `<div class="card bad"><b>${I.t}</b><p>${I.d}</p></div><p>Llegaste al destino ${cpi + 1} de ${cps.length}. Para aprobar debes completar la ruta al 100%, sin ninguna infracción. Repite el examen.</p><p style="font-size:13px;opacity:.8">Intentos: ${st.intentos} · Aprobados: ${st.aprobados}</p>`;
   }
-  $('again').onclick = () => brief('exam');
+  $('again').onclick = () => brief('exam'); $('next').classList.add('hidden');
   show('result');
 }
 function endFree() {
@@ -969,11 +1108,13 @@ function endFree() {
   const cnt = {}; log.forEach(l => cnt[l.code] = (cnt[l.code] || 0) + 1);
   $('resT').textContent = `Puntaje final: ${score}`;
   $('resB').innerHTML = log.length ? '<p>Infracciones cometidas:</p>' + Object.keys(cnt).map(k => `<div class="card bad"><b>${INF[k].t} ×${cnt[k]}</b><p>${INF[k].d}</p></div>`).join('') : '<div class="card good"><b>¡Sin infracciones!</b></div>';
-  $('again').onclick = () => brief('free'); show('result');
+  $('again').onclick = () => brief('free'); $('next').classList.add('hidden'); show('result');
 }
 
-function show(id) { if (id) $('dash').classList.add('hidden'); for (const s of ['menu', 'signs', 'help', 'brief', 'pause', 'result']) $(s).classList.toggle('hidden', s !== id); }
+function show(id) { if (id) $('dash').classList.add('hidden'); for (const s of ['menu', 'signs', 'help', 'brief', 'pause', 'result', 'sits']) $(s).classList.toggle('hidden', s !== id); }
 function brief(m) {
+  if (m === 'free' && !Licencia.full && Licencia.simLeft() <= 0) { Licencia.paywall('Ya usaste los 5 minutos de conducción libre de hoy. Vuelve mañana o desbloquea la versión completa.', () => brief('free')); return; }
+  if (m === 'exam' && !Licencia.full) { Licencia.paywall('El examen práctico del simulador es parte de la versión completa. En la demo puedes probar 5 minutos de conducción libre.', () => brief('exam')); return; }
   $('briefT').textContent = m === 'exam' ? '🎓 Examen práctico' : '🌆 Conducción libre';
   $('briefB').innerHTML = (m === 'exam'
     ? `<p>Recorre 5 destinos en orden y termina estacionando en el lugar marcado. Sigue la flecha amarilla y el mapa.</p><div class="card"><b>Para aprobar (100%)</b><ul class="ck">
@@ -1030,16 +1171,18 @@ tap('snd', () => { soundOn = !soundOn; $('snd').textContent = soundOn ? '🔊' :
 tap('pauseB', () => { if (running) { paused = true; show('pause'); } });
 $('resume').onclick = () => { paused = false; show(null); last = performance.now(); };
 $('restart').onclick = () => { startGame(mode); };
-document.querySelectorAll('[data-menu]').forEach(b => b.onclick = () => { if (running && mode === 'free' && paused) { paused = false; endFree(); return; } running = false; paused = false; $('hud').classList.add('hidden'); $('ctl').classList.add('hidden'); $('rot').classList.add('hidden'); show('menu'); });
+document.querySelectorAll('[data-menu]').forEach(b => b.onclick = () => { if (running && mode === 'free' && paused) { paused = false; endFree(); return; } sitClean(); running = false; paused = false; $('hud').classList.add('hidden'); $('ctl').classList.add('hidden'); $('rot').classList.add('hidden'); show('menu'); });
 document.querySelectorAll('[data-back]').forEach(b => b.onclick = () => show('menu'));
-$('mExam').onclick = () => brief('exam'); $('mFree').onclick = () => brief('free');
-$('mSigns').onclick = () => show('signs'); $('mHelp').onclick = () => show('help');
+$('mExam').onclick = () => brief('exam');
+const lockUI = () => { $('examLock').textContent = Licencia.full ? '' : '🔒 Versión completa'; };
+lockUI(); document.addEventListener('licencia', lockUI); $('mFree').onclick = () => brief('free');
+$('mSigns').onclick = () => show('signs'); $('mSit').onclick = openSits; $('mHelp').onclick = () => show('help');
 const KEYS = { ArrowLeft: 'l', KeyA: 'l', ArrowRight: 'r', KeyD: 'r', ArrowUp: 'gas', KeyW: 'gas', ArrowDown: 'brake', KeyS: 'brake', Space: 'brake' };
 addEventListener('keydown', e => {
   if (KEYS[e.code]) { inp[KEYS[e.code]] = 1; e.preventDefault(); }
   if (!running || e.repeat) return;
-  if (e.code === 'KeyQ') setSignal(PL.signal === 'l' ? null : 'l');
-  if (e.code === 'KeyE') setSignal(PL.signal === 'r' ? null : 'r');
+  if (e.code === 'KeyZ' || e.code === 'KeyQ') setSignal(PL.signal === 'l' ? null : 'l');
+  if (e.code === 'KeyX' || e.code === 'KeyE') setSignal(PL.signal === 'r' ? null : 'r');
   if (e.code === 'KeyB' && !PL.belt) { PL.belt = true; toast('Cinturón abrochado ✅', 'ok', 1200); }
   if (e.code === 'KeyC') { camMode = (camMode + 1) % 3; updCamera(0, true); }
   if (e.code === 'KeyH') beep(330, .3);
@@ -1067,4 +1210,4 @@ P.x = 18; P.z = 4 * S + LO; P.h = Math.PI / 2; player.g.position.set(P.x, 0, P.z
 resetPL(); spawnAIs(16);
 scene.traverse(m => { if (!m.isMesh && !m.isInstancedMesh) return; if (m.userData.sky) return; m.receiveShadow = HI; if (!m.userData.flat && HI) m.castShadow = true; });
 resize(); layoutMirror(); requestAnimationFrame(frame);
-window.__sim = { step: dt => update(dt), setCP, P, PL, inp, CTRL, PEDS, lightState, get simT() { return simT; }, get amb() { return amb; }, get ais() { return ais; }, get log() { return log; }, startGame, locate, get running() { return running; }, get cpi() { return cpi; } };
+window.__sim = { step: dt => update(dt), setCP, P, PL, inp, CTRL, PEDS, lightState, get simT() { return simT; }, get amb() { return amb; }, get ais() { return ais; }, get log() { return log; }, startGame, locate, get running() { return running; }, get cpi() { return cpi; }, SIT, openSit, get sitObj() { return sitObj; }, get mode() { return mode; } };
