@@ -68,6 +68,7 @@ canvas#gl{position:fixed;inset:0;width:100%;height:100%;display:block}
 .sg img{width:64px;height:64px;object-fit:contain}
 .sg b{display:block}
 .sg span{font-size:13px;color:#dbe4ee}
+.opt{background:rgba(255,255,255,.1);border-radius:10px;padding:8px 10px;margin:6px 0;font-size:15px}.opt.right{background:#1a7f37;font-weight:700}
 ul.ck{padding-left:20px;margin:6px 0}ul.ck li{margin:4px 0}
 .row{display:flex;gap:10px}.row .mbtn{text-align:center}
 #dash{position:fixed;left:0;right:0;bottom:0;height:44vh;pointer-events:none;background:linear-gradient(to top,#15171b 0%,#24272d 55%,rgba(36,39,45,0) 100%)}
@@ -123,13 +124,13 @@ body.cab #msn{top:calc(16px + min(260px,30vw)/3 + env(safe-area-inset-top))}
 <div id="ctl" class="hidden">
   <div class="grp"><button class="cbtn" id="bL" aria-label="Izquierda">◀</button><button class="cbtn" id="bR" aria-label="Derecha">▶</button></div>
   <div id="mid">
-    <button class="sbtn" id="sigL" aria-label="Intermitente izquierdo">⬅</button>
+    <button class="sbtn" id="sigL" aria-label="Intermitente izquierdo (Z)">⬅</button>
     <button class="sbtn" id="gearB" aria-label="Marcha D o R">D</button>
     <button class="sbtn" id="belt" aria-label="Cinturón">🔒 Cinturón</button>
     <button class="sbtn" id="cam" aria-label="Cámara">🎥</button>
     <button class="sbtn" id="horn" aria-label="Bocina">📯</button>
     <button class="sbtn" id="tiltB" aria-label="Volante por inclinación">📱↻</button>
-    <button class="sbtn" id="sigR" aria-label="Intermitente derecho">➡</button>
+    <button class="sbtn" id="sigR" aria-label="Intermitente derecho (X)">➡</button>
   </div>
   <div class="grp"><button class="cbtn" id="bBrake">FRENO</button><button class="cbtn" id="bGas">ACELERAR</button></div>
 </div>
@@ -139,6 +140,7 @@ body.cab #msn{top:calc(16px + min(260px,30vw)/3 + env(safe-area-inset-top))}
     <h1>🚗 Simulador de conducción</h1>
     <p>Recorre una ciudad con calles, semáforos, señales de tránsito chilenas, pasos de cebra, rotonda, zona escolar y vehículos de emergencia. Cada infracción se explica según la Ley de Tránsito.</p>
     <button class="mbtn" id="mExam">🎓 Examen práctico<small>Ruta con 5 destinos. Igual que en la app: debes hacerlo al 100%, sin ninguna infracción. Si cometes una, repites. <b id="examLock"></b></small></button>
+    <button class="mbtn" id="mSit">📝 Situaciones del test<small>Practica manejando lo que te preguntan en el examen teórico: PARE, ceda el paso, peatones, rotonda, ambulancia y más.</small></button>
     <button class="mbtn" id="mFree">🌆 Conducción libre<small>Maneja por la ciudad, busca destinos y suma puntos. Cada infracción descuenta.</small></button>
     <button class="mbtn alt" id="mSigns">🚦 Señales y reglas del simulador<small>Qué significa cada señal y qué se evalúa.</small></button>
     <button class="mbtn alt" id="mHelp">🎮 Controles<small>Botones en pantalla o teclado.</small></button>
@@ -157,8 +159,10 @@ body.cab #msn{top:calc(16px + min(260px,30vw)/3 + env(safe-area-inset-top))}
   <li>⬅ ➡ intermitentes. Actívalos <b>antes</b> de entrar al cruce donde vas a virar.</li>
   <li>🔒 abrocha el cinturón antes de partir. 🎥 cambia la cámara (atrás, conductor con tablero y espejo retrovisor, aérea).</li><li>📱↻ volante por inclinación: gira el teléfono como si fuera un volante.</li><li>El auto tiene caja de cambios automática, inercia y freno motor: suelta el acelerador con anticipación para detenerte.</li></ul>
   <p style="font-size:13px">Se juega mejor con el teléfono horizontal.</p></div>
-  <div class="card"><b>Con teclado</b><ul class="ck"><li>Flechas o W A S D: conducir · R: cambiar entre D y reversa</li><li>Q / E: intermitente izquierdo / derecho</li><li>B: cinturón · C: cámara · H: bocina · P: pausa</li></ul></div>
+  <div class="card"><b>Con teclado</b><ul class="ck"><li>Flechas o W A S D: conducir · R: cambiar entre D y reversa</li><li><b>Z / X: intermitente izquierdo / derecho</b> (también Q / E)</li><li>B: cinturón · C: cámara · H: bocina · P: pausa</li></ul></div>
   <button class="mbtn" data-back>Volver</button></div></div>
+
+<div id="sits" class="scr hidden"><div class="box"><h1>📝 Situaciones del test</h1><p>Cada situación parte con una pregunta del examen teórico. Respóndela mentalmente y luego demuéstralo manejando. Al terminar verás la respuesta correcta.</p><p id="sitProg" style="font-weight:700"></p><div id="sitList"></div><button class="mbtn alt" data-back style="text-align:center">Volver</button></div></div>
 
 <div id="brief" class="scr dim hidden"><div class="box">
   <h1 id="briefT">Examen práctico</h1>
@@ -177,6 +181,7 @@ body.cab #msn{top:calc(16px + min(260px,30vw)/3 + env(safe-area-inset-top))}
 <div id="result" class="scr dim hidden"><div class="box">
   <h1 id="resT"></h1><div id="resB"></div>
   <div class="row"><button class="mbtn alt" data-menu>Menú</button><button class="mbtn" id="again">Repetir</button></div>
+  <button class="mbtn hidden" id="next" style="text-align:center">Siguiente situación ▶</button>
 </div></div>
 
 <div id="rot" class="hidden">Gira el teléfono para ver mejor la calle ↻</div>
