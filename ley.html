@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="es-CL">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#1f4e79">
+<title>Ley de Tránsito en voz alta</title>
+<link rel="icon" href="icon.svg">
+<link rel="manifest" href="manifest.webmanifest">
+<style>
+:root{--bg:#f4f6f9;--card:#fff;--ink:#1b2430;--muted:#5b6675;--line:#dde3ea;--pri:#1f4e79;--pri-ink:#fff;--hl:#fff2b8;--sel:#e8f0f9}
+@media (prefers-color-scheme:dark){:root{--bg:#10151c;--card:#19212b;--ink:#e8edf3;--muted:#9aa6b4;--line:#2b3644;--pri:#5b9bd5;--pri-ink:#0b1420;--hl:#4a3d0c;--sel:#1e3047}}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+header{background:var(--pri);color:var(--pri-ink);padding:calc(12px + env(safe-area-inset-top)) 16px 12px;position:sticky;top:0;z-index:5}
+header .in{max-width:760px;margin:0 auto;display:flex;align-items:center;gap:10px}
+header a{color:inherit;text-decoration:none;font-size:22px;line-height:1}
+header h1{font-size:18px;margin:0;flex:1}
+main{max-width:760px;margin:0 auto;padding:12px 16px 150px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin:12px 0}
+.muted{color:var(--muted)}.small{font-size:13px}
+input[type=search]{width:100%;padding:12px 14px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--ink);font-size:16px}
+details.tit{background:var(--card);border:1px solid var(--line);border-radius:14px;margin:10px 0;overflow:hidden}
+details.tit>summary{list-style:none;cursor:pointer;padding:14px 16px;font-weight:700;display:flex;gap:10px;align-items:flex-start}
+details.tit>summary::-webkit-details-marker{display:none}
+details.tit>summary .r{display:block;font-weight:500;font-size:13px;color:var(--muted)}
+details.tit>summary .pl{margin-left:auto;flex:none;border:0;background:var(--sel);color:var(--pri);border-radius:10px;padding:6px 10px;font-weight:700;font-size:14px;cursor:pointer}
+.arts{padding:0 16px 10px}
+.h{font-weight:700;color:var(--pri);margin:14px 0 4px;font-size:14px}
+.art{border-top:1px solid var(--line);padding:10px 0}
+.art .ab{display:flex;gap:8px;align-items:center;margin-bottom:4px}
+.art .ab b{flex:1}
+.art .ab button{border:0;background:var(--sel);color:var(--pri);border-radius:10px;padding:5px 10px;font-size:14px;font-weight:700;cursor:pointer}
+.art p{margin:6px 0;cursor:pointer;border-radius:6px;padding:2px 4px;margin-left:-4px}
+.art p.on{background:var(--hl)}
+mark{background:var(--hl);color:inherit}
+#player{position:fixed;left:0;right:0;bottom:0;background:var(--card);border-top:1px solid var(--line);box-shadow:0 -4px 18px rgba(0,0,0,.12);padding:10px 16px calc(10px + env(safe-area-inset-bottom));z-index:6}
+#player .in{max-width:760px;margin:0 auto}
+#now{font-size:13px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:8px}
+.ctl{display:flex;gap:8px;align-items:center}
+.ctl button{border:0;border-radius:12px;background:var(--sel);color:var(--pri);font-size:20px;height:46px;min-width:46px;cursor:pointer}
+.ctl #play{background:var(--pri);color:var(--pri-ink);flex:1;font-size:17px;font-weight:700}
+.ctl select{height:46px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--ink);font-size:15px;padding:0 6px}
+.warn{background:#fff4dc;color:#8a5a00;border-radius:10px;padding:10px 12px;font-size:14px}
+.btnl{display:block;text-align:center;text-decoration:none;padding:12px;border-radius:12px;border:1.5px solid var(--pri);color:var(--pri);font-weight:600;margin-top:8px}
+</style>
+</head>
+<body>
+<header><div class="in"><a href="./" aria-label="Volver">‹</a><h1>📘 Ley de Tránsito en voz alta</h1></div></header>
+<main>
+  <div class="card">
+    <p style="margin-top:0">Escucha el texto oficial de la <b>Ley N° 18.290</b> (versión de la Biblioteca del Congreso Nacional del <span id="ver"></span>). Toca <b>▶</b> en un título o artículo para empezar a escuchar desde ahí, o toca cualquier párrafo.</p>
+    <p class="small muted" style="margin-bottom:0">Para el examen conviene partir por: <a href="#" data-go="9">De la conducción</a> · <a href="#" data-go="10">Virajes</a> · <a href="#" data-go="11">Derecho preferente de paso</a> · <a href="#" data-go="12">Velocidad</a> · <a href="#" data-go="13">Estacionamiento</a> · <a href="#" data-go="8">Señalización</a></p>
+    <div id="noTTS" class="warn" hidden style="margin-top:10px">Tu navegador no permite la lectura en voz alta. Puedes leer el texto aquí o descargar el PDF.</div>
+  </div>
+  <input type="search" id="q" placeholder="Buscar en la ley (ej.: cinturón, velocidad, alcohol)" aria-label="Buscar en la ley">
+  <p id="qn" class="small muted"></p>
+  <div id="list"><p class="muted">Cargando la ley…</p></div>
+  <div class="card">
+    <a class="btnl" id="pdf" target="_blank" rel="noopener">Descargar PDF oficial</a>
+    <a class="btnl" href="https://www.bcn.cl/leychile/navegar?idNorma=1007469" target="_blank" rel="noopener">Ver en la BCN (siempre la última versión)</a>
+  </div>
+</main>
+<div id="player"><div class="in">
+  <div id="now">Elige un título o artículo para escuchar</div>
+  <div class="ctl">
+    <button id="prev" aria-label="Artículo anterior">⏮</button>
+    <button id="play">▶ Escuchar</button>
+    <button id="next" aria-label="Artículo siguiente">⏭</button>
+    <select id="rate" aria-label="Velocidad"><option value="0.8">0,8×</option><option value="1" selected>1×</option><option value="1.2">1,2×</option><option value="1.5">1,5×</option><option value="2">2×</option></select>
+  </div>
+</div></div>
+<script>
+(function(){
+const PDF='https://nuevo.leychile.cl/servicios/Consulta/Exportar?radioExportar=Normas&exportar_formato=pdf&nombrearchivo=Ley-de-Transito-18290&exportar_con_notas_bcn=False&exportar_con_notas_originales=False&exportar_con_notas_al_pie=False&hddResultadoExportar=1007469.2026-10-22.0.0%23';
+document.getElementById('pdf').href=PDF;
+const $=id=>document.getElementById(id), esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const ls={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
+const synth=window.speechSynthesis, hasTTS=!!(synth&&window.SpeechSynthesisUtterance);
+if(!hasTTS){$('noTTS').hidden=false;$('play').disabled=true}
+let LEY=null, ITEMS=[], cur=-1, playing=false, voice=null, utt=null, chunks=[], ci=0, token=0;
+$('rate').value=ls.get('ley_rate')||'1';
+
+function pickVoice(){ if(!hasTTS) return; const v=synth.getVoices(); const es=v.filter(x=>/^es/i.test(x.lang));
+  voice=es.find(x=>/es[-_]CL/i.test(x.lang))||es.find(x=>/es[-_](419|US|MX|AR|CO)/i.test(x.lang))||es.find(x=>/google/i.test(x.name))||es[0]||null; }
+if(hasTTS){pickVoice(); synth.onvoiceschanged=pickVoice;}
+
+// Texto que se dice en voz alta: abreviaturas comunes expandidas
+function speakable(t){return t.replace(/\bArt\.\s?/g,'artículo ').replace(/\bArts\.\s?/g,'artículos ').replace(/\bN[º°]\s?/g,'número ').replace(/\binc\.\s?/g,'inciso ').replace(/\bkm\/h\b/gi,'kilómetros por hora').replace(/\bD\.F\.L\./g,'decreto con fuerza de ley ').replace(/\s\-\s/g,', ');}
+// Divide en frases cortas: algunos navegadores cortan la lectura de textos largos
+function split(t){const out=[];let s='';for(const part of t.split(/(?<=[\.;:])\s+/)){if((s+' '+part).length>220&&s){out.push(s);s=part}else s=s?s+' '+part:part}if(s)out.push(s);
+  return out.flatMap(x=>x.length<=260?[x]:x.match(/.{1,240}(\s|$)/g));}
+
+function render(filter){
+  const f=(filter||'').trim().toLowerCase(); let html='', hits=0;
+  LEY.tit.forEach((t,ti)=>{
+    let body='';
+    t.a.forEach(a=>{
+      if(a.h){ if(!f) body+=`<div class="h">${esc(a.h)}</div>`; return; }
+      if(f && !a.p.some(p=>p.toLowerCase().includes(f))) return;
+      hits++;
+      const ps=a.p.map((p,pi)=>{let h=esc(p); if(f){const re=new RegExp(f.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'),'gi'); h=h.replace(re,m=>`<mark>${m}</mark>`)} return `<p data-i="${a._i}" data-p="${pi}">${h}</p>`}).join('');
+      body+=`<div class="art" id="a${a._i}"><div class="ab"><b>Artículo ${esc(a.n)}</b><button data-play="${a._i}" aria-label="Escuchar artículo ${esc(a.n)}">▶</button></div>${ps}</div>`;
+    });
+    if(f && !body) return;
+    html+=`<details class="tit" id="t${ti}" ${f?'open':''}><summary><span>${esc(t.t)}<span class="r">${esc(t.r)}</span></span><button class="pl" data-tit="${ti}" aria-label="Escuchar ${esc(t.t)}">▶</button></summary><div class="arts">${body}</div></details>`;
+  });
+  $('list').innerHTML=html||'<p class="muted">No se encontró ese texto en la ley.</p>';
+  $('qn').textContent=f?`${hits} artículo${hits===1?'':'s'} con "${filter.trim()}"`:'';
+  if(cur>=0) mark();
+}
+
+function mark(){document.querySelectorAll('.art p.on').forEach(e=>e.classList.remove('on')); const it=ITEMS[cur]; if(!it) return;
+  const el=document.querySelector(`.art p[data-i="${it.i}"][data-p="${it.p}"]`); if(el){el.classList.add('on'); const r=el.getBoundingClientRect(); if(r.top<70||r.bottom>innerHeight-130) el.scrollIntoView({block:'center',behavior:'smooth'});} }
+function label(){const it=ITEMS[cur]; if(!it) return; $('now').textContent=`${LEY.tit[it.t].t.split(' — ')[0]} · Artículo ${it.n}`;}
+
+function speakChunk(my){
+  if(my!==token||!playing) return;
+  if(ci>=chunks.length){ if(cur<ITEMS.length-1){go(cur+1,true)} else stop(); return; }
+  utt=new SpeechSynthesisUtterance(chunks[ci]); utt.lang=voice?voice.lang:'es-CL'; if(voice) utt.voice=voice; utt.rate=+$('rate').value;
+  utt.onend=()=>{if(my!==token) return; ci++; speakChunk(my)};
+  utt.onerror=e=>{if(my!==token) return; if(e.error==='interrupted'||e.error==='canceled') return; ci++; speakChunk(my)};
+  synth.speak(utt);
+}
+function go(k,autoplay){
+  if(k<0||k>=ITEMS.length) return; cur=k; ls.set('ley_pos',String(k));
+  const it=ITEMS[k], d=document.getElementById('t'+it.t); if(d&&!d.open) d.open=true;
+  label(); mark();
+  if(autoplay&&hasTTS){ token++; synth.cancel(); playing=true; setBtn();
+    chunks=split(speakable(it.text)); ci=0; const my=token; setTimeout(()=>speakChunk(my),60); }
+}
+function stop(){token++; playing=false; if(hasTTS) synth.cancel(); setBtn();}
+function setBtn(){$('play').textContent=playing?'⏸ Pausa':'▶ Escuchar';}
+const artStart=k=>{let j=k; while(j>0&&ITEMS[j-1].i===ITEMS[k].i) j--; return j};
+const artNext=k=>{let j=k; while(j<ITEMS.length&&ITEMS[j].i===ITEMS[k].i) j++; return j};
+
+$('play').onclick=()=>{ if(playing){stop();return} go(cur<0?0:cur,true); };
+$('next').onclick=()=>{const j=artNext(Math.max(cur,0)); if(j<ITEMS.length) go(j,playing)};
+$('prev').onclick=()=>{if(cur<0) return; let j=artStart(cur); if(j===cur&&j>0) j=artStart(j-1); go(j,playing)};
+$('rate').onchange=()=>{ls.set('ley_rate',$('rate').value); if(playing) go(cur,true)};
+$('list').addEventListener('click',e=>{
+  const b=e.target.closest('button');
+  if(b&&b.dataset.tit!=null){e.preventDefault(); const ti=+b.dataset.tit, k=ITEMS.findIndex(x=>x.t===ti); if(k>=0) go(k,true); return}
+  if(b&&b.dataset.play!=null){const k=ITEMS.findIndex(x=>x.i===+b.dataset.play); if(k>=0) go(k,true); return}
+  const p=e.target.closest('.art p'); if(p){const k=ITEMS.findIndex(x=>x.i===+p.dataset.i&&x.p===+p.dataset.p); if(k>=0) go(k,true)}
+});
+document.querySelectorAll('[data-go]').forEach(a=>a.onclick=e=>{e.preventDefault(); $('q').value=''; render(''); const d=$('t'+a.dataset.go); if(d){d.open=true; d.scrollIntoView({behavior:'smooth'})}});
+let qt; $('q').oninput=()=>{clearTimeout(qt); qt=setTimeout(()=>render($('q').value),200)};
+// Chrome en Android a veces pausa la voz si la pantalla queda inactiva: se retoma al volver
+document.addEventListener('visibilitychange',()=>{ if(!document.hidden&&playing&&hasTTS&&!synth.speaking) go(cur,true); });
+addEventListener('pagehide',()=>{ if(hasTTS) synth.cancel(); });
+
+fetch('ley.json').then(r=>r.json()).then(d=>{
+  LEY=d; $('ver').textContent=new Date(d.ver+'T12:00').toLocaleDateString('es-CL',{day:'numeric',month:'long',year:'numeric'});
+  let ai=0;
+  d.tit.forEach((t,ti)=>t.a.forEach(a=>{ if(a.h) return; a._i=ai++; a.p.forEach((p,pi)=>ITEMS.push({t:ti,i:a._i,n:a.n,p:pi,text:p})); }));
+  render('');
+  const sp=+ls.get('ley_pos'); if(sp>0&&sp<ITEMS.length){cur=sp; label(); $('now').textContent+=' (donde quedaste)';}
+  if(location.hash==='#escuchar') $('play').focus();
+}).catch(()=>{$('list').innerHTML='<p class="warn">No se pudo cargar la ley. Revisa tu conexión e inténtalo de nuevo.</p>'});
+})();
+</script>
+</body>
+</html>

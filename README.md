@@ -12,6 +12,7 @@ App web (PWA) para practicar el examen teórico de licencia de conducir clase B 
 
 - `index.html`: la app.
 - `simulador/`: simulador de conducción 3D (three.js incluido localmente, sin build). Ciudad con semáforos, PARE, CEDA EL PASO, rotonda, zona escolar, pasos de cebra, calle de un sentido, ambulancias y estacionamiento. Modos: examen práctico (100%, sin infracciones), conducción libre y "Situaciones del test" (12 escenarios que recrean preguntas del examen teórico; la demo trae las 3 primeras). Intermitentes con Z / X.
+- `ley.html` + `ley.json`: Ley de Tránsito 18.290 (texto oficial BCN, versión 22-10-2026) con lectura en voz alta (Web Speech API), búsqueda y velocidad de lectura. `herramientas/ley_bcn.py` regenera el JSON.
 - `data.js`: banco de preguntas que usa la app (261 preguntas).
 - `imagenes.js`: ilustraciones SVG propias.
 - `herramientas/`: scripts que generan las ilustraciones y las preguntas con dibujo.

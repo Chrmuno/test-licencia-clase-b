@@ -133,8 +133,9 @@ function home(){
   if(h.length){html+=`<div class="card"><h2 style="font-size:18px">Tus intentos</h2><p class="muted small">Mejor puntaje: ${best}/${MAX} · Aprobados: ${passed} de ${h.length}</p><table class="hist">`+
     h.slice(-10).reverse().map(x=>`<tr><td>${new Date(x.t).toLocaleString('es-CL',{dateStyle:'short',timeStyle:'short'})}</td><td class="${x.s===MAX?'pass':'fail'}">${x.s}/${MAX}</td></tr>`).join('')+`</table></div>`}
   html+=`<div class="card"><h2 style="font-size:18px">📘 Ley de Tránsito vigente</h2>
-  <p class="small muted">Texto oficial de la Ley N° 18.290 (DFL 1 de 2009), desde la Biblioteca del Congreso Nacional. Versión del ${LEY.ver}.</p>
-  <a class="btn" style="display:block;text-align:center;text-decoration:none;padding:14px 18px;border-radius:12px" href="${LEY.pdf}" target="_blank" rel="noopener">Descargar PDF</a>
+  <p class="small muted">Texto oficial de la Ley N° 18.290 (DFL 1 de 2009), desde la Biblioteca del Congreso Nacional. Versión del ${LEY.ver}. Puedes escucharla en voz alta, buscar un tema o descargarla.</p>
+  <a class="btn" style="display:block;text-align:center;text-decoration:none;padding:14px 18px;border-radius:12px" href="ley.html">🔊 Escuchar la ley en voz alta</a>
+  <p></p><a class="btn2" style="display:block;width:100%;text-align:center;text-decoration:none;padding:14px 18px;border-radius:12px;font-weight:600" href="${LEY.pdf}" target="_blank" rel="noopener">Descargar PDF</a>
   <p class="small" style="text-align:center;margin-top:10px"><a href="${LEY.web}" target="_blank" rel="noopener" style="color:var(--pri)">Ver en la BCN (siempre la última versión)</a></p></div>`;
   html+=`<p class="small muted" style="text-align:center">Banco de ${Q.length} preguntas basado en el cuestionario oficial clase B (Municipalidad de Puente Alto).</p><footer style="text-align:center;font-size:13px;color:var(--muted);border-top:1px solid var(--line);margin-top:18px;padding-top:14px">Creado por <b style="color:var(--ink)">Christian Muñoz</b></footer>`;
   app.innerHTML=html;
