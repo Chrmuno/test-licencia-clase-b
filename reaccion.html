@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Test de reacción</title>
+<meta name="theme-color" content="#1f4e79">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="manifest" href="manifest.webmanifest">
+<style>
+:root{--bg:#f4f6f9;--card:#fff;--ink:#1b2430;--muted:#5b6675;--line:#dde3ea;--pri:#1f4e79;--pri-ink:#fff;--ok:#1e7d4f;--ok-bg:#e5f4ec;--bad:#b42318;--bad-bg:#fdecea;--warn:#8a5a00;--warn-bg:#fff4dc;--sel:#e8f0f9}
+@media (prefers-color-scheme:dark){:root{--bg:#10151c;--card:#19212b;--ink:#e8edf3;--muted:#9aa6b4;--line:#2b3644;--pri:#5b9bd5;--pri-ink:#0b1420;--ok:#4cc38a;--ok-bg:#15301f;--bad:#f2766b;--bad-bg:#3a1a17;--warn:#f0b54a;--warn-bg:#33270f;--sel:#1e3047}}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+header.top{background:var(--pri);color:var(--pri-ink);padding:calc(14px + env(safe-area-inset-top)) 16px 14px}
+header.top .in{max-width:640px;margin:0 auto;display:flex;align-items:center;gap:12px}
+header.top a{color:inherit;text-decoration:none;font-size:22px;line-height:1}
+header.top h1{font-size:18px;margin:0}
+.wrap{max-width:640px;margin:0 auto;padding:16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;margin:14px 0}
+h2{font-size:20px;margin:0 0 8px}p{margin:8px 0}.muted{color:var(--muted)}.small{font-size:13px}
+button{font:inherit;border:0;border-radius:12px;padding:14px 18px;cursor:pointer}
+.btn{background:var(--pri);color:var(--pri-ink);font-weight:600;width:100%}
+.btn2{background:transparent;color:var(--pri);border:1.5px solid var(--pri);font-weight:600;width:100%}
+.pad{position:relative;height:min(58vh,420px);border-radius:18px;display:grid;place-items:center;text-align:center;user-select:none;-webkit-user-select:none;touch-action:manipulation;cursor:pointer;background:#2b3644;color:#fff;transition:background .05s}
+.pad.wait{background:#2b3644}.pad.go{background:#1e9e5a}.pad.red{background:#c0392b}.pad.early{background:#8a5a00}
+.pad b{display:block;font-size:30px}.pad span{font-size:16px;opacity:.9}
+.light{width:120px;height:120px;border-radius:50%;margin:0 auto 14px;background:rgba(255,255,255,.12);box-shadow:inset 0 0 0 6px rgba(255,255,255,.18)}
+.pad.go .light{background:#7dffb0;box-shadow:0 0 40px #7dffb0}.pad.red .light{background:#ff8a7a;box-shadow:0 0 40px #ff8a7a}
+.res{text-align:center}.big{font-size:52px;font-weight:800;line-height:1;margin:8px 0}
+.row{display:flex;justify-content:space-between;border-bottom:1px solid var(--line);padding:8px 0;font-size:15px}
+.row:last-child{border:0}
+.lvl{display:inline-block;border-radius:20px;padding:4px 12px;font-weight:700;font-size:14px}
+.gap{height:10px}
+</style>
+</head>
+<body>
+<header class="top"><div class="in"><a href="./" aria-label="Volver al inicio">‹</a><h1>Test de reacción</h1></div></header>
+<main class="wrap" id="app"></main>
+<script>
+(function(){
+const app=document.getElementById('app');
+const KEY='testClaseB.reaccion';
+const ls={get(){try{return JSON.parse(localStorage.getItem(KEY))||{}}catch(e){return {}}},set(v){try{localStorage.setItem(KEY,JSON.stringify(v))}catch(e){}}};
+const MODES={
+  simple:{name:'Reacción simple',rounds:5,desc:'Toca la pantalla apenas la luz se ponga verde. Son 5 intentos.'},
+  eleccion:{name:'Reacción con elección',rounds:10,desc:'Toca solo cuando la luz sea verde. Si es roja, no toques. Son 10 luces.'}
+};
+let G=null,timer=null;
+function level(ms){
+  if(ms<300)return ['Excelente','var(--ok-bg)','var(--ok)'];
+  if(ms<400)return ['Bueno','var(--ok-bg)','var(--ok)'];
+  if(ms<550)return ['Regular: puedes mejorar','var(--warn-bg)','var(--warn)'];
+  return ['Lento: practica y descansa bien','var(--bad-bg)','var(--bad)'];
+}
+function menu(){
+  clearTimeout(timer);const b=ls.get();
+  app.innerHTML=`<div class="card"><h2>⚡ Entrena tus reflejos</h2>
+  <p class="muted">En el examen médico de la municipalidad (examen psicométrico) se miden tus tiempos de reacción ante estímulos visuales y tu coordinación. Aquí puedes practicar algo parecido.</p>
+  <p class="small muted">Es solo una práctica de referencia: el equipo y los criterios del examen real los define cada municipalidad.</p></div>
+  ${Object.keys(MODES).map(k=>`<div class="card"><h2 style="font-size:18px">${MODES[k].name}</h2><p class="muted small">${MODES[k].desc}</p>
+  ${b[k]?`<p class="small">Tu mejor promedio: <b>${b[k]} ms</b></p>`:''}<button class="btn" data-m="${k}">Empezar</button></div>`).join('')}
+  <div class="card"><h2 style="font-size:18px">Consejos para el día del examen</h2>
+  <p class="small">• Duerme bien la noche anterior y no llegues con hambre.<br>• Si usas lentes o audífonos, llévalos.<br>• Evita el alcohol y medicamentos que den sueño los días previos.<br>• Mantén la vista en el punto de estímulo y la mano o el pie listos.</p></div>`;
+  app.querySelectorAll('[data-m]').forEach(x=>x.onclick=()=>start(x.dataset.m));
+  window.scrollTo(0,0);
+}
+function start(m){
+  const seq=[];
+  if(m==='eleccion'){const reds=3+Math.floor(Math.random()*2);for(let i=0;i<10;i++)seq.push(i<reds?'r':'g');seq.sort(()=>Math.random()-.5)}
+  else for(let i=0;i<5;i++)seq.push('g');
+  G={m,seq,i:0,times:[],early:0,falsos:0,miss:0,state:'idle',t0:0};
+  pad('Toca para comenzar','Mantén el dedo listo','wait');
+}
+function pad(t,sub,cls){
+  app.innerHTML=`<p class="muted small" style="text-align:center">${MODES[G.m].name} · ${Math.min(G.i+1,G.seq.length)} de ${G.seq.length}</p>
+  <div class="pad ${cls}" id="pad"><div><div class="light"></div><b>${t}</b><span>${sub}</span></div></div>
+  <div class="gap"></div><button class="btn2" id="salir">Salir</button>`;
+  const p=document.getElementById('pad');
+  p.addEventListener('pointerdown',e=>{e.preventDefault();tap()});
+  document.getElementById('salir').onclick=menu;
+}
+function arm(){
+  G.state='armed';pad('Espera…','No toques todavía','wait');
+  timer=setTimeout(()=>{
+    const c=G.seq[G.i];G.t0=performance.now();
+    if(c==='g'){G.state='go';pad('¡AHORA!','Toca','go')}
+    else{G.state='red';pad('¡No toques!','Luz roja','red');timer=setTimeout(()=>{next()},1200)}
+  },1200+Math.random()*2300);
+}
+function tap(){
+  const s=G.state;
+  if(s==='idle'||s==='feedback'){arm();return}
+  if(s==='armed'){clearTimeout(timer);G.early++;G.state='feedback';pad('Muy pronto','Espera la luz. Toca para seguir','early');return}
+  if(s==='go'){const ms=Math.round(performance.now()-G.t0);G.times.push(ms);G.state='feedback';G.i++;
+    if(G.i>=G.seq.length){end();return}
+    pad(`${ms} ms`,'Toca para la siguiente luz','wait');return}
+  if(s==='red'){clearTimeout(timer);G.falsos++;G.state='feedback';G.i++;
+    if(G.i>=G.seq.length){end();return}
+    pad('Era roja','No debías tocar. Toca para seguir','early');return}
+}
+function next(){G.i++;if(G.i>=G.seq.length){end();return}G.state='feedback';pad('Bien, no tocaste','Toca para la siguiente luz','wait')}
+function end(){
+  clearTimeout(timer);
+  const n=G.times.length, avg=n?Math.round(G.times.reduce((a,b)=>a+b,0)/n):0, best=n?Math.min(...G.times):0;
+  const errs=G.early+G.falsos, [lv,bg,fg]=avg?level(avg):['Sin datos','var(--line)','var(--muted)'];
+  const b=ls.get();let rec=false;if(avg&&(!b[G.m]||avg<b[G.m])){b[G.m]=avg;ls.set(b);rec=true}
+  app.innerHTML=`<div class="card res"><p class="muted">${MODES[G.m].name}</p><p class="muted small" style="margin:0">Tu promedio</p>
+  <div class="big">${avg||'—'}<span style="font-size:22px"> ms</span></div>
+  <span class="lvl" style="background:${bg};color:${fg}">${lv}</span>${rec?'<p class="small" style="color:var(--ok);font-weight:700">¡Nuevo récord personal!</p>':''}</div>
+  <div class="card"><div class="row"><span>Mejor tiempo</span><b>${best?best+' ms':'—'}</b></div>
+  <div class="row"><span>Toques antes de tiempo</span><b>${G.early}</b></div>
+  ${G.m==='eleccion'?`<div class="row"><span>Tocaste con luz roja</span><b>${G.falsos}</b></div>`:''}
+  <p class="small muted">${errs?'Los toques antes de tiempo o con luz roja son errores de impulsividad: en el examen real también cuentan. Concéntrate en esperar la señal correcta.':'Sin errores de impulsividad. ¡Bien!'}</p></div>
+  <button class="btn" id="otra">Repetir</button><div class="gap"></div><button class="btn2" id="menu">Volver</button>`;
+  document.getElementById('otra').onclick=()=>start(G.m);
+  document.getElementById('menu').onclick=menu;
+}
+menu();
+})();
+</script>
+</body>
+</html>
