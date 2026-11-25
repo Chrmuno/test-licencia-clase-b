@@ -77,6 +77,18 @@ button{font:inherit;border:0;border-radius:12px;padding:14px 18px;cursor:pointer
 .fb{border-radius:12px;padding:12px 14px;margin-top:12px;font-size:15px}
 .fb.ok{background:var(--ok-bg);color:var(--ok)}.fb.no{background:var(--bad-bg);color:var(--bad)}
 .fb .ex{color:var(--ink);margin-top:6px;font-weight:400}
+.tiles{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0}
+.tile{display:block;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;text-align:left;color:var(--ink);text-decoration:none;font:inherit;width:100%;cursor:pointer}
+.tile .ic{font-size:26px;line-height:1}.tile b{display:block;font-size:15px;margin-top:6px}.tile span{display:block;font-size:13px;color:var(--muted);margin-top:2px}
+.tile .pill{display:inline-block;font-size:11px;font-weight:700;padding:2px 7px;border-radius:20px;background:var(--sel);color:var(--pri);margin-top:6px}
+.ready{display:flex;align-items:center;gap:14px}
+.ring{--p:0;flex:none;width:76px;height:76px;border-radius:50%;background:conic-gradient(var(--ok) calc(var(--p)*1%),var(--line) 0);display:grid;place-items:center}
+.ring b{width:60px;height:60px;border-radius:50%;background:var(--card);display:grid;place-items:center;font-size:18px}
+.topic{display:block;width:100%;text-align:left;background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin:8px 0;font:inherit;cursor:pointer}
+.topic .row{display:flex;justify-content:space-between;gap:8px;font-weight:600}.topic .row small{color:var(--muted);font-weight:500}
+.topic .bar i{background:var(--ok)}
+.timer{font-variant-numeric:tabular-nums}.timer.low{color:#ffd27a}
+.btn2.full{display:block;width:100%;text-align:center;text-decoration:none;padding:14px 18px;border-radius:12px}
 </style>
 </head>
 <body>
@@ -88,7 +100,7 @@ button{font:inherit;border:0;border-radius:12px;padding:14px 18px;cursor:pointer
 <script src="licencia.js"></script>
 <script>
 (function(){
-const N_TOTAL=35, N_DOBLE=3, MAX=N_TOTAL+N_DOBLE, KEY='testClaseB.v1';
+const N_TOTAL=35, N_DOBLE=3, MAX=N_TOTAL+N_DOBLE, KEY='testClaseB.v1', TLIM=45*60*1000;
 const D=window.BANCO, T=D.t;
 const LEY={ver:'22 de octubre de 2026',
   pdf:'https://nuevo.leychile.cl/servicios/Consulta/Exportar?radioExportar=Normas&exportar_formato=pdf&nombrearchivo=Ley-de-Transito-18290&exportar_con_notas_bcn=False&exportar_con_notas_originales=False&exportar_con_notas_al_pie=False&hddResultadoExportar=1007469.2026-10-22.0.0%23',
@@ -98,9 +110,14 @@ const Q=D.q.map(r=>({id:r[0],tema:T[r[1]],p:r[2],o:r[3],c:r[4].split(''),d:!!r[5
 const L='abcdef';
 const app=document.getElementById('app'), nav=document.getElementById('nav'), navin=document.getElementById('navin'), hdr=document.getElementById('hdr');
 let S=null;
-const load=()=>{let st;try{st=JSON.parse(localStorage.getItem(KEY))}catch(e){}st=st||{};st.h=st.h||[];st.cur=st.cur||null;st.err=(st.err||[]).filter(id=>D.q.some(r=>r[0]===id));return st};
+const load=()=>{let st;try{st=JSON.parse(localStorage.getItem(KEY))}catch(e){}st=st||{};st.h=st.h||[];st.cur=st.cur||null;st.err=(st.err||[]).filter(id=>D.q.some(r=>r[0]===id));st.qs=st.qs||{};st.racha=st.racha||0;return st};
 const save=st=>{try{localStorage.setItem(KEY,JSON.stringify(st))}catch(e){}};
 let store=load();
+// qs: último resultado de cada pregunta (1 bien, 0 mal) para medir el avance por tema
+function mark(id,ok){store.qs[id]=ok?1:0;if(ok)store.err=store.err.filter(x=>x!==id);else if(!store.err.includes(id))store.err.push(id)}
+const dominated=list=>list.filter(q=>store.qs[q.id]===1).length;
+let tick=null;const stopTick=()=>{if(tick){clearInterval(tick);tick=null}};
+const mmss=ms=>{ms=Math.max(0,ms);const m=Math.floor(ms/60000),x=Math.floor(ms%60000/1000);return m+':'+String(x).padStart(2,'0')};
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
 function newTest(){
@@ -119,37 +136,75 @@ function optShort(q,k){const i=L.indexOf(k);return q.oimg?`${k}) <span class="mi
 function hintTxt(q){const n=q.c.length;return n>1?`Marca ${n===2?'las 2':n===3?'las 3':'todas las'} respuestas correctas`:'Marca una respuesta'}
 function isRight(q,ans){ans=(ans||[]).slice().sort();return ans.length===q.c.length&&ans.every((x,i)=>x===q.c[i])}
 function home(){
-  nav.hidden=true;hdr.textContent='';
+  stopTick();nav.hidden=true;hdr.textContent='';
   const h=store.h, best=h.reduce((m,x)=>Math.max(m,x.s),0), passed=h.filter(x=>x.s===MAX).length;
+  const dom=dominated(Q), pct=Math.round(dom/Q.length*100);
+  const last3=h.slice(-3), streakOk=last3.length===3&&last3.every(x=>x.s===MAX);
+  const tile=(id,ic,t,sub,pill,href)=>href?`<a class="tile" href="${href}"><div class="ic">${ic}</div><b>${t}</b><span>${sub}</span>${pill?`<i class="pill">${pill}</i>`:''}</a>`:`<button class="tile" id="${id}"><div class="ic">${ic}</div><b>${t}</b><span>${sub}</span>${pill?`<i class="pill">${pill}</i>`:''}</button>`;
   let html=`<div class="card"><h2>Practica tu examen teórico</h2>
   <p class="muted">Mismo formato que el examen municipal clase B de CONASET.</p>
-  <div class="facts"><div class="fact"><b>${N_TOTAL}</b><span>preguntas</span></div><div class="fact"><b>${MAX}</b><span>puntos</span></div><div class="fact"><b>100%</b><span>para aprobar</span></div></div>
+  <div class="facts"><div class="fact"><b>${N_TOTAL}</b><span>preguntas</span></div><div class="fact"><b>${MAX}</b><span>puntos</span></div><div class="fact"><b>45</b><span>minutos</span></div></div>
   ${Licencia.full?`<p class="small" style="color:var(--ok);font-weight:600">⭐ Versión completa activada</p>`:`<div style="background:var(--warn-bg);color:var(--warn);border-radius:10px;padding:10px 12px;margin:10px 0;font-size:14px">Estás usando la <b>demo</b>: ${Licencia.testsLeftToday()>0?'te queda 1 test hoy':'ya usaste tu test de hoy'}. <a href="#" id="getFull" style="color:var(--pri);font-weight:700">Obtener versión completa</a></div>`}
   <p class="small muted">${N_DOBLE} preguntas valen doble (marcadas con ★). En el examen real se aprueba con 33 puntos; aquí te exigimos ${MAX} de ${MAX} para que llegues seguro. Si no logras el 100%, debes repetir el test.</p>
-  ${store.cur?`<button class="btn" id="cont">Continuar test en curso</button><p></p><button class="btn2" style="width:100%" id="go">Empezar uno nuevo</button>`:`<button class="btn" id="go">Comenzar test</button>`}
-  ${store.err.length?`<p></p><button class="btn2" style="width:100%" id="studyAll">Estudiar mis errores (${store.err.length})</button>`:''}
-  <p></p><a class="btn2" style="display:block;width:100%;text-align:center;text-decoration:none;padding:14px 18px;border-radius:12px;font-weight:600" href="simulador/">🚗 Simulador de conducción (práctico)</a>
-  </div>`;
+  ${store.cur?`<button class="btn" id="cont">Continuar test en curso</button><p></p><button class="btn2 full" id="go">Empezar uno nuevo</button>`:`<button class="btn" id="go">Comenzar test</button>`}
+  </div>
+  <div class="card"><div class="ready"><div class="ring" style="--p:${pct}"><b>${pct}%</b></div><div><h2 style="font-size:18px;margin:0">Tu preparación</h2>
+  <p class="small muted" style="margin:4px 0 0">Dominas ${dom} de ${Q.length} preguntas del banco.${streakOk?' Aprobaste tus últimos 3 tests con 100%: ¡estás listo!':pct<60?' Practica por tema para subir este número.':' Sigue así: apunta a aprobar 3 tests seguidos con 100%.'}</p></div></div></div>
+  <h2 style="font-size:18px;margin:18px 2px 0">Más formas de practicar</h2>
+  <div class="tiles">
+  ${tile('tPrac','📚','Práctica por tema','Con respuesta al instante',`${pct}% dominado`)}
+  ${tile('tRacha','🔥','Modo racha','Una a una, se corta al fallar',store.racha?`Récord: ${store.racha}`:'')}
+  ${tile('tErr','🎯','Mis errores',store.err.length?`${store.err.length} por repasar`:'Sin errores pendientes','')}
+  ${tile('tSen','🚸','Señales e imágenes','Solo preguntas con dibujo','')}
+  ${tile('','⚡','Test de reacción','Como el psicotécnico','','reaccion.html')}
+  ${tile('','🚗','Simulador 3D','Examen práctico','','simulador/')}
+  </div>
+  <a class="tile" href="guia.html" style="display:flex;gap:12px;align-items:center"><div class="ic">🪪</div><div><b style="margin:0">Cómo sacar tu licencia clase B</b><span>Requisitos, documentos y exámenes, paso a paso</span></div></a>`;
   if(h.length){html+=`<div class="card"><h2 style="font-size:18px">Tus intentos</h2><p class="muted small">Mejor puntaje: ${best}/${MAX} · Aprobados: ${passed} de ${h.length}</p><table class="hist">`+
-    h.slice(-10).reverse().map(x=>`<tr><td>${new Date(x.t).toLocaleString('es-CL',{dateStyle:'short',timeStyle:'short'})}</td><td class="${x.s===MAX?'pass':'fail'}">${x.s}/${MAX}</td></tr>`).join('')+`</table></div>`}
+    h.slice(-10).reverse().map(x=>`<tr><td>${new Date(x.t).toLocaleString('es-CL',{dateStyle:'short',timeStyle:'short'})}${x.m?` <span class="muted">· ${Math.round(x.m/60000)} min</span>`:''}</td><td class="${x.s===MAX?'pass':'fail'}">${x.s}/${MAX}</td></tr>`).join('')+`</table></div>`}
   html+=`<div class="card"><h2 style="font-size:18px">📘 Ley de Tránsito vigente</h2>
   <p class="small muted">Texto oficial de la Ley N° 18.290 (DFL 1 de 2009), desde la Biblioteca del Congreso Nacional. Versión del ${LEY.ver}. Puedes escucharla en voz alta, buscar un tema o descargarla.</p>
   <a class="btn" style="display:block;text-align:center;text-decoration:none;padding:14px 18px;border-radius:12px" href="ley.html">🔊 Escuchar la ley en voz alta</a>
-  <p></p><a class="btn2" style="display:block;width:100%;text-align:center;text-decoration:none;padding:14px 18px;border-radius:12px;font-weight:600" href="${LEY.pdf}" target="_blank" rel="noopener">Descargar PDF</a>
+  <p></p><a class="btn2 full" href="${LEY.pdf}" target="_blank" rel="noopener">Descargar PDF</a>
   <p class="small" style="text-align:center;margin-top:10px"><a href="${LEY.web}" target="_blank" rel="noopener" style="color:var(--pri)">Ver en la BCN (siempre la última versión)</a></p></div>`;
   html+=`<p class="small muted" style="text-align:center">Banco de ${Q.length} preguntas basado en el cuestionario oficial clase B (Municipalidad de Puente Alto).</p><footer style="text-align:center;font-size:13px;color:var(--muted);border-top:1px solid var(--line);margin-top:18px;padding-top:14px">Creado por <b style="color:var(--ink)">Christian Muñoz</b></footer>`;
   app.innerHTML=html;
   const gf=document.getElementById('getFull');if(gf)gf.onclick=e=>{e.preventDefault();Licencia.paywall('',home)};
   document.getElementById('go').onclick=()=>{if(!store.cur||confirmNew())newTest()};
   const c=document.getElementById('cont');if(c)c.onclick=()=>{S=store.cur;renderQ()};
-  const sa=document.getElementById('studyAll');if(sa)sa.onclick=()=>startStudy(store.err.slice());
+  document.getElementById('tPrac').onclick=practiceHome;
+  document.getElementById('tRacha').onclick=startRacha;
+  document.getElementById('tErr').onclick=()=>{if(store.err.length)startStudy(store.err.slice());else alertBox('Aún no tienes errores guardados. Cuando falles una pregunta en un test o en la práctica, aparecerá aquí.')};
+  document.getElementById('tSen').onclick=()=>startTopic('img');
   window.scrollTo(0,0);
 }
+function alertBox(msg){const d=document.createElement('div');d.className='fb ok';d.style.cssText='position:fixed;left:16px;right:16px;bottom:24px;z-index:50;max-width:600px;margin:0 auto;box-shadow:0 6px 24px rgba(0,0,0,.2)';d.textContent=msg;document.body.appendChild(d);setTimeout(()=>d.remove(),3500)}
+// ---- Práctica por tema: lista de temas con su avance ----
+function practiceHome(){
+  stopTick();hdr.textContent='Práctica';
+  const imgQ=Q.filter(q=>q.img||q.oimg);
+  const row=(key,name,list)=>{const d=dominated(list),p=Math.round(d/list.length*100);return `<button class="topic" data-t="${key}"><div class="row"><span>${esc(name)}</span><small>${d}/${list.length}</small></div><div class="bar"><i style="width:${p}%"></i></div></button>`};
+  app.innerHTML=`<div class="card"><h2>Práctica por tema</h2><p class="small muted">Respondes y ves al tiempo si acertaste, con la explicación. Primero salen las preguntas que aún no dominas. Una pregunta cuenta como dominada cuando tu última respuesta fue correcta.</p>
+  ${Licencia.full?'':`<p class="small" style="background:var(--warn-bg);color:var(--warn);border-radius:10px;padding:8px 10px">Demo: ${Licencia.practiceLeft()} de ${Licencia.LIMITS.practicePerDay} preguntas de práctica disponibles hoy.</p>`}
+  ${row('all','🔀 Todas mezcladas',Q)}${row('img','🚸 Señales e imágenes',imgQ)}
+  ${T.map((t,i)=>{const l=Q.filter(q=>q.tema===t);return l.length?row(i,t,l):''}).join('')}</div>`;
+  app.querySelectorAll('.topic').forEach(b=>b.onclick=()=>startTopic(b.dataset.t));
+  nav.hidden=false;navin.innerHTML=`<button class="btn2" id="inicio">Inicio</button>`;document.getElementById('inicio').onclick=home;window.scrollTo(0,0);
+}
+function startTopic(key){
+  const list=key==='all'?Q:key==='img'?Q.filter(q=>q.img||q.oimg):Q.filter(q=>q.tema===T[+key]);
+  const name=key==='all'?'Todas mezcladas':key==='img'?'Señales e imágenes':T[+key];
+  const pend=shuffle(list.filter(q=>store.qs[q.id]!==1)), ok=shuffle(list.filter(q=>store.qs[q.id]===1));
+  drill(pend.concat(ok).map(q=>q.id),'tema',name);
+}
+function startRacha(){drill(shuffle(Q).map(q=>q.id),'racha','Modo racha')}
 function confirmNew(){return true}
 function answered(){return S.ids.filter(id=>(S.a[id]||[]).length).length}
 function renderQ(){
   const q=byId(S.ids[S.i]), sel=S.a[q.id]||[], multi=q.c.length>1;
-  hdr.textContent=`${answered()}/${N_TOTAL} respondidas`;
+  if(Date.now()-S.start>=TLIM){finish(true);return}
+  const upd=()=>{const left=TLIM-(Date.now()-S.start);if(left<=0){finish(true);return}hdr.innerHTML=`<span class="timer${left<5*60000?' low':''}">⏱ ${mmss(left)}</span> · ${answered()}/${N_TOTAL}`};
+  upd();if(!tick)tick=setInterval(upd,1000);
   app.innerHTML=`<div class="meta"><span>Pregunta ${S.i+1} de ${N_TOTAL}</span><span>${pts(q)} punto${q.d?'s':''}</span></div>
   <div class="bar"><i style="width:${(S.i+1)/N_TOTAL*100}%"></i></div>
   <div class="card">${q.d?'<span class="tag">★ Doble puntaje</span>':''}<span class="tag t">${esc(q.tema)}</span>
@@ -172,14 +227,14 @@ function renderQ(){
   const nx=document.getElementById('next');if(nx)nx.onclick=()=>{S.i++;renderQ();window.scrollTo(0,0)};
   const fn=document.getElementById('fin');if(fn)fn.onclick=finish;
 }
-function finish(){
+function finish(timeout){
+  stopTick();
   let s=0;const wrong=[];
-  S.ids.forEach(id=>{const q=byId(id);if(isRight(q,S.a[id]))s+=pts(q);else wrong.push(q)});
+  S.ids.forEach(id=>{const q=byId(id),r=isRight(q,S.a[id]);if(r)s+=pts(q);else wrong.push(q);mark(id,r)});
   const ok=s===MAX, ans=S.a;
-  store.h.push({t:Date.now(),s});store.h=store.h.slice(-50);store.cur=null;
-  wrong.forEach(q=>{if(!store.err.includes(q.id))store.err.push(q.id)});save(store);
+  store.h.push({t:Date.now(),s,m:Math.min(TLIM,Date.now()-S.start)});store.h=store.h.slice(-50);store.cur=null;save(store);
   nav.hidden=false;hdr.textContent='';
-  app.innerHTML=`<div class="card result"><p class="muted">Tu puntaje</p><div class="big ${ok?'pass':'fail'}">${s}<span style="font-size:24px">/${MAX}</span></div>
+  app.innerHTML=`<div class="card result">${timeout?'<div class="banner bad">⏱ Se acabó el tiempo de 45 minutos. Las preguntas sin responder cuentan como malas.</div>':''}<p class="muted">Tu puntaje</p><div class="big ${ok?'pass':'fail'}">${s}<span style="font-size:24px">/${MAX}</span></div>
   ${ok?`<div class="banner ok">¡Aprobado con el 100%! Estás listo para el examen municipal.</div>`:
   `<div class="banner bad">No aprobado. Necesitas ${MAX} de ${MAX}. Revisa tus ${wrong.length} error${wrong.length===1?'':'es'} y repite el test.</div>`}
   <p class="small muted">${s>=33?'En el examen real (mínimo 33 puntos) este puntaje te habría alcanzado para aprobar.':'En el examen real se necesitan al menos 33 puntos.'}</p></div>`+
@@ -195,21 +250,25 @@ function finish(){
   const hm=document.getElementById('home');if(hm)hm.onclick=home;
   window.scrollTo(0,0);
 }
-// ---- Modo estudio: corrige las preguntas malas con respuesta y explicación inmediata ----
+// ---- Modos con respuesta inmediata: errores, práctica por tema y racha ----
 let ST=null;
-function startStudy(ids){if(!Licencia.full){Licencia.paywall('El modo "Estudiar mis errores" es parte de la versión completa.',()=>startStudy(ids));return}ST={ids:shuffle(ids),i:0,sel:[],done:false,ok:0};renderStudy()}
+function startStudy(ids){if(!Licencia.full){Licencia.paywall('El modo "Estudiar mis errores" es parte de la versión completa.',()=>startStudy(ids));return}drill(shuffle(ids),'err','Estudiando tus errores')}
+function drill(ids,mode,title){stopTick();if(!ids.length){home();return}ST={ids,mode,title,i:0,sel:[],done:false,ok:0};renderStudy()}
 function renderStudy(){
-  const q=byId(ST.ids[ST.i]), multi=q.c.length>1, show=ST.done;
-  hdr.textContent=`Estudio ${ST.i+1}/${ST.ids.length}`;
+  if(ST.mode==='tema'&&!ST.done&&!ST.sel.length&&Licencia.practiceLeft()<=0){
+    Licencia.paywall(`En la demo puedes practicar ${Licencia.LIMITS.practicePerDay} preguntas por tema al día. Vuelve mañana o desbloquea la versión completa.`,renderStudy);
+    if(ST.i>0){studyEnd();return}else{practiceHome();return}}
+  const q=byId(ST.ids[ST.i]), multi=q.c.length>1, show=ST.done, racha=ST.mode==='racha';
+  hdr.textContent=racha?`🔥 ${ST.ok} · Récord ${store.racha}`:`${ST.i+1}/${ST.ids.length}`;
   const right=show&&isRight(q,ST.sel);
-  app.innerHTML=`<div class="meta"><span>Estudiando tus errores</span><span>${ST.i+1} de ${ST.ids.length}</span></div>
-  <div class="bar"><i style="width:${(ST.i+1)/ST.ids.length*100}%"></i></div>
+  app.innerHTML=`<div class="meta"><span>${esc(ST.title)}</span><span>${racha?`Racha actual: ${ST.ok}`:`${ST.i+1} de ${ST.ids.length}`}</span></div>
+  <div class="bar"><i style="width:${racha?Math.min(100,ST.ok/Math.max(store.racha,10)*100):(ST.i+1)/ST.ids.length*100}%"></i></div>
   <div class="card">${q.d?'<span class="tag">★ Doble puntaje</span>':''}<span class="tag t">${esc(q.tema)}</span>
   <div class="q">${esc(q.p)}</div>${figHTML(q)}<div class="hint">${hintTxt(q)}</div>
   ${q.o.map((t,k)=>{const L1=L[k],on=ST.sel.includes(L1),cor=q.c.includes(L1);
     const cls=show?(cor?' ok':(on?' no':'')):(on?' on':'');
     return `<button class="opt${multi?' multi':''}${cls}" data-k="${L1}" ${show?'disabled':''}><span class="l">${L1}</span>${optInner(q,L1)}</button>`}).join('')}
-  ${show?`<div class="fb ${right?'ok':'no'}"><b>${right?'¡Correcto! La sacamos de tu lista de errores.':'Incorrecto. La correcta está marcada en verde.'}</b><div class="ex">💡 ${esc(q.e)}</div></div>`:''}
+  ${show?`<div class="fb ${right?'ok':'no'}"><b>${right?(ST.mode==='err'?'¡Correcto! La sacamos de tu lista de errores.':racha?`¡Correcto! Llevas ${ST.ok} seguidas.`:'¡Correcto!'):(racha?`Se cortó tu racha en ${ST.ok}. La correcta está marcada en verde.`:'Incorrecto. La correcta está marcada en verde.')}</b><div class="ex">💡 ${esc(q.e)}</div></div>`:''}
   </div>`;
   if(!show)app.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{const k=b.dataset.k;
     if(multi){ST.sel=ST.sel.includes(k)?ST.sel.filter(x=>x!==k):ST.sel.concat(k)}else{ST.sel=[k];check();return}
@@ -217,20 +276,26 @@ function renderStudy(){
   nav.hidden=false;
   if(!show){navin.innerHTML=`<button class="btn2" id="salir">Salir</button>`+(multi?`<button class="btn" id="chk" ${ST.sel.length?'':'disabled'}>Comprobar</button>`:'');
     const ck=document.getElementById('chk');if(ck)ck.onclick=check}
+  else if(racha&&!right){navin.innerHTML=`<button class="btn2" id="salir">Inicio</button><button class="btn" id="rev">Revancha</button>`;document.getElementById('rev').onclick=startRacha}
   else{const last=ST.i===ST.ids.length-1;navin.innerHTML=`<button class="btn2" id="salir">Salir</button><button class="btn" id="sig">${last?'Terminar':'Siguiente'}</button>`;
     document.getElementById('sig').onclick=()=>{if(last)studyEnd();else{ST.i++;ST.sel=[];ST.done=false;renderStudy();window.scrollTo(0,0)}}}
-  document.getElementById('salir').onclick=home;
+  document.getElementById('salir').onclick=ST.mode==='tema'&&!(racha&&!right)?practiceHome:home;
 }
-function check(){const q=byId(ST.ids[ST.i]);ST.done=true;
-  if(isRight(q,ST.sel)){ST.ok++;store.err=store.err.filter(id=>id!==q.id)}else if(!store.err.includes(q.id))store.err.push(q.id);
+function check(){const q=byId(ST.ids[ST.i]),r=isRight(q,ST.sel);ST.done=true;
+  if(r)ST.ok++;mark(q.id,r);
+  if(ST.mode==='tema')Licencia.usePractice();
+  if(ST.mode==='racha'&&ST.ok>store.racha)store.racha=ST.ok;
   save(store);renderStudy()}
 function studyEnd(){
-  hdr.textContent='';
-  app.innerHTML=`<div class="card result"><p class="muted">Repaso terminado</p><div class="big pass">${ST.ok}<span style="font-size:24px">/${ST.ids.length}</span></div>
-  <p>${store.err.length?`Te quedan <b>${store.err.length}</b> preguntas por dominar. Puedes repasarlas cuando quieras desde el inicio.`:'¡No te quedan errores pendientes!'}</p></div>`;
-  navin.innerHTML=(store.err.length?`<button class="btn2" id="again2">Repasar de nuevo</button>`:`<button class="btn2" id="inicio">Inicio</button>`)+`<button class="btn" id="nt">Hacer test</button>`;
+  const n=ST.i+1;hdr.textContent='';
+  const tema=ST.mode==='tema';
+  app.innerHTML=`<div class="card result"><p class="muted">${tema?esc(ST.title):'Repaso terminado'}</p><div class="big pass">${ST.ok}<span style="font-size:24px">/${n}</span></div>
+  <p>${tema?'correctas en esta práctica.':''} ${store.err.length?`Te quedan <b>${store.err.length}</b> preguntas en tu lista de errores.`:'¡No te quedan errores pendientes!'}</p></div>`;
+  navin.innerHTML=tema?`<button class="btn2" id="otro">Otro tema</button><button class="btn" id="nt">Hacer test</button>`:
+    (store.err.length?`<button class="btn2" id="again2">Repasar de nuevo</button>`:`<button class="btn2" id="inicio">Inicio</button>`)+`<button class="btn" id="nt">Hacer test</button>`;
   const a2=document.getElementById('again2');if(a2)a2.onclick=()=>startStudy(store.err.slice());
   const i2=document.getElementById('inicio');if(i2)i2.onclick=home;
+  const o2=document.getElementById('otro');if(o2)o2.onclick=practiceHome;
   document.getElementById('nt').onclick=newTest;window.scrollTo(0,0);
 }
 home();

@@ -17,7 +17,7 @@
     billing: false,
     service: null,
     ready: null,
-    LIMITS: { testsPerDay: 1, simFreeSecs: 300 },
+    LIMITS: { testsPerDay: 1, simFreeSecs: 300, practicePerDay: 10 },
     async init() {
       if (!('getDigitalGoodsService' in window)) return;
       try {
@@ -52,6 +52,8 @@
     // ---- límites de la demo ----
     testsLeftToday() { if (this.full) return Infinity; let d; try { d = JSON.parse(ls.get(DEMO) || '{}'); } catch (e) { d = {}; } return d.day === today() ? Math.max(0, this.LIMITS.testsPerDay - (d.n || 0)) : this.LIMITS.testsPerDay; },
     useTest() { if (this.full) return; let d; try { d = JSON.parse(ls.get(DEMO) || '{}'); } catch (e) { d = {}; } if (d.day !== today()) d = { day: today(), n: 0 }; d.n++; ls.set(DEMO, JSON.stringify(d)); },
+    practiceLeft() { if (this.full) return Infinity; let d; try { d = JSON.parse(ls.get('lic_prac') || '{}'); } catch (e) { d = {}; } return d.day === today() ? Math.max(0, this.LIMITS.practicePerDay - (d.n || 0)) : this.LIMITS.practicePerDay; },
+    usePractice() { if (this.full) return; let d; try { d = JSON.parse(ls.get('lic_prac') || '{}'); } catch (e) { d = {}; } if (d.day !== today()) d = { day: today(), n: 0 }; d.n++; ls.set('lic_prac', JSON.stringify(d)); },
     simLeft() { if (this.full) return Infinity; let d; try { d = JSON.parse(ls.get('lic_sim') || '{}'); } catch (e) { d = {}; } return d.day === today() ? Math.max(0, this.LIMITS.simFreeSecs - (d.s || 0)) : this.LIMITS.simFreeSecs; },
     addSim(dt) { if (this.full) return; this._acc = (this._acc || 0) + dt; if (this._acc < 2) return; let d; try { d = JSON.parse(ls.get('lic_sim') || '{}'); } catch (e) { d = {}; } if (d.day !== today()) d = { day: today(), s: 0 }; d.s += this._acc; this._acc = 0; ls.set('lic_sim', JSON.stringify(d)); },
     // ---- pantalla de compra ----
@@ -70,7 +72,7 @@
 </style><div class="b" role="dialog" aria-modal="true">
 <h3>⭐ Versión completa</h3>
 ${reason ? `<p class="why">${reason}</p>` : ''}
-<ul><li>Tests ilimitados todos los días</li><li>Modo "Estudiar mis errores" con explicaciones</li><li>Examen práctico completo en el simulador 3D</li><li>Conducción libre sin límite de tiempo (la demo da 5 minutos al día)</li><li>Pago único: sin suscripción ni anuncios</li></ul>
+<ul><li>Tests ilimitados todos los días</li><li>Modo "Estudiar mis errores" con explicaciones</li><li>Práctica por tema sin límite (la demo da 10 preguntas al día)</li><li>Examen práctico completo en el simulador 3D</li><li>Conducción libre sin límite de tiempo (la demo da 5 minutos al día)</li><li>Pago único: sin suscripción ni anuncios</li></ul>
 <p class="pr">${this.price} <small>pago único</small></p>
 ${this.billing ? `<button class="buy" id="lic-buy">Comprar versión completa</button><button class="lnk" id="lic-rest">Ya la compré: restaurar compra</button>`
           : this.inApp ? `<p style="font-size:14px;color:#5b6675">La compra todavía no está disponible en esta versión de la app. Actualiza la app desde Google Play.</p><a class="btn buy" href="${PLAY_URL}">Abrir Google Play</a>`
